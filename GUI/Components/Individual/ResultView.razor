@@ -1,0 +1,65 @@
+﻿@using GUI.Components.Client
+@inject ClientClass ClientClass
+
+<MudTable Items="@List" Dense="true" Filter="new Func<Estate,bool>(FilterFunc)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Found Estates</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Type</MudTh>
+        <MudTh>Number</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh>Width x1</MudTh>
+        <MudTh>Height x1</MudTh>
+        <MudTh>Width x2</MudTh>
+        <MudTh>Height x2</MudTh>
+        <MudTh></MudTh>
+        <MudTh/>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Type">@context.GetType()</MudTd>
+        <MudTd DataLabel="Number">@context.Number</MudTd>
+        <MudTd DataLabel="Description">@context.Description</MudTd>
+        <MudTd DataLabel="Width x1">@context.LeftBottom.Width</MudTd>
+        <MudTd DataLabel="Height x1">@context.LeftBottom.Height</MudTd>
+        <MudTd DataLabel="Width x2">@context.RightTop.Width</MudTd>
+        <MudTd DataLabel="Height x2">@context.RightTop.Height</MudTd>
+        <MudTd><MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="edit" OnClick="() => Edit(context)"></MudIconButton></MudTd>
+        <MudTd><MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="() => Remove(context)"/></MudTd>
+
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+
+
+
+@code {
+    [Parameter]
+    public List<Estate> List { get; set; }
+    private string? searchString { get; set; }
+
+    private bool FilterFunc(Estate estate)
+    {
+        if (string.IsNullOrEmpty(searchString) || string.IsNullOrEmpty(estate.Description))
+        {
+            return true;
+        }
+        return estate.Description.Contains(searchString);
+    }
+
+    private void Remove(Estate estate)
+    {
+        List.Remove(estate);
+        ClientClass.RemoveEstate(estate);
+    }
+
+    private void Edit(Estate estate)
+    {
+        
+    }
+}

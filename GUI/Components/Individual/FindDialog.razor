@@ -1,0 +1,51 @@
+﻿@inject ISnackbar Snackbar
+<MudDialog>
+    <TitleContent>
+        Find Estates by GPS position
+    </TitleContent>
+    <DialogContent>
+        <MudRadioGroup T="int" @bind-Value="Model.EstateType">
+            <MudRadio Value="0">Properties</MudRadio>
+            <MudRadio Value="1">Parcels</MudRadio>
+            <MudRadio Value="2">All</MudRadio>
+        </MudRadioGroup>
+        <MudGrid>
+            <MudItem>
+                <MudTextField Label=" width" T="double" @bind-Value="Model.X">
+                </MudTextField>
+                <MudTextField T="double" Label="height" @bind-Value="Model.Y">
+                </MudTextField>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+    [Parameter]
+    public FindModel Model { get; set; }
+
+    private void Submit()
+    {
+        if (Model.X != null && Model.Y != null)
+            MudDialog.Close(DialogResult.Ok(Model));
+        else
+            Snackbar.Add("All fields must be assigned.", Severity.Error);
+    }
+
+
+
+    private void Cancel() => MudDialog.Cancel();
+
+
+    public class FindModel
+    {
+        public double X { get; set; }
+        public double Y { get; set; }
+        public int EstateType { get; set; } //0-Property, 1-Parcel, 2-All
+    }
+}

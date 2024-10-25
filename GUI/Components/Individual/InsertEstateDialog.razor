@@ -1,0 +1,70 @@
+﻿@inject ISnackbar Snackbar
+<MudDialog>
+    <TitleContent>
+        Estate Insert
+    </TitleContent>
+    <DialogContent>
+        <MudRadioGroup T="int" @bind-Value="Model.EstateType">
+            <MudRadio Value="0">Property</MudRadio>
+            <MudRadio Value="1">Parcel</MudRadio>
+        </MudRadioGroup>
+        <MudTextField Label="Description" T="string" @bind-Value="Model.Description">
+            Description
+        </MudTextField>
+        <MudTextField Label="Number" T="int" @bind-Value="Model.Number">
+            Number
+        </MudTextField>
+
+        <MudPaper Elevation="1" Style="margin-top:1%;">
+            <MudItem xs="12" Style="text-align: center;">
+                <MudText Typo="Typo.body1">GPS positions</MudText>
+            </MudItem>
+            <MudGrid Style="margin-top:5px;">
+                <MudItem>
+                    <MudText Typo="Typo.body2"> Left Bottom Position</MudText>
+                    <MudTextField Label="width" T="double" @bind-Value="Model.X1">
+                    </MudTextField>
+                    <MudTextField T="double" Label="height" @bind-Value="Model.Y1">
+                    </MudTextField>
+                </MudItem>
+                <MudItem>
+                    <MudText Typo="Typo.body2"> Right Top Position</MudText>
+                    <MudTextField T="double" Label="width" @bind-Value="Model.X2">
+                    </MudTextField>
+                    <MudTextField T="double" Label="height" @bind-Value="Model.Y2">
+                    </MudTextField>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+    [Parameter]
+    public EstateModel Model { get; set; }
+
+    private void Submit() {
+        if (Model.X1 != null && Model.X2 != null && Model.Y1 != null && Model.Number != null && Model.Description != null)
+            MudDialog.Close(DialogResult.Ok(Model));
+        else
+            Snackbar.Add("All fields must be assigned.", Severity.Error);
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    public class EstateModel
+    {
+        public double X1 { get; set; }
+        public double X2 { get; set; }
+        public double Y1 { get; set; }
+        public double Y2 { get; set; }
+        public string Description { get; set; }
+        public int Number { get; set; }
+        public int EstateType { get; set; }
+    }
+}

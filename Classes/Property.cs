@@ -1,33 +1,34 @@
-﻿using System.ComponentModel;
-using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Classes
 {
-    public class Parcel : Estate
+    public class Property : Estate
     {
-        
         public List<Estate>? References { get; set; } = new();
-        public Parcel()
-        {
 
-        }
-        public Parcel(long id, GPS leftBottom, GPS rightTop, int parcelNumber, string parcelDescription) 
+        public Property(long id, GPS leftBottom, GPS rightTop, int propertyNumber, string propertyDescription)
         {
             Id = id;
             LeftBottom = leftBottom;
             RightTop = rightTop;
-            Description = parcelDescription;
-            Number = parcelNumber;
+            Description = propertyDescription;
+            Number = propertyNumber;
         }
 
         public override string? GetDescription()
         {
             return Description;
         }
+
         public override int? GetNumber()
         {
             return Number;
         }
+
         public override void SetDescription(string description)
         {
             Description = description;
@@ -47,14 +48,14 @@ namespace Classes
             References.Remove(estate);
         }
 
-        public bool Equals(Parcel other)
+        public bool Equals(Property other)
         {
-            return     RightTop.Height.Equals(other.RightTop.Height)
+            return RightTop.Height.Equals(other.RightTop.Height)
                     && RightTop.Width.Equals(other.RightTop.Width)
                     && LeftBottom.Height.Equals(other.LeftBottom.Height)
                     && LeftBottom.Width.Equals(other.LeftBottom.Width)
-                    && Number.Equals(other.Number)
                     && Description.Equals(other.Description)
+                    && Number.Equals(other.Number)
                     && Id == other.Id;
         }
     }

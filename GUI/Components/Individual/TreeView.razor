@@ -1,0 +1,155 @@
+﻿@using Classes.structures
+@using System.Collections
+
+<MudText Typo="Typo.h6">@Name</MudText>
+
+@if (VisualizationNode != null)
+{
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudTreeView Items="@TreeItems" Hover="true" SelectionMode="SelectionMode.SingleSelection">
+                <ItemTemplate>
+                    <MudTreeViewItem OnClick="() => ContextSelected(ref context)" @bind-Expanded="@context.Expanded" Items="@context.Children" Value="@context.Value"
+                                     Text="@context.Text" EndTextTypo="@Typo.caption" />
+                </ItemTemplate>
+            </MudTreeView>
+        </MudItem>
+        <MudItem xs="12" md="6">
+            @if (SelectedValues != null && SelectedValues.Count() > 0)
+            {
+                <MudPaper>
+                    <MudIconButton Icon="@Icons.Material.Filled.KeyboardDoubleArrowUp" Style="right:2%;position:absolute" OnClick="RemoveSelected"></MudIconButton>
+                    <MudItem xs="12" Style="text-align: center;">
+                        <MudText Typo="Typo.h6">Selected Estate(s)</MudText>
+                    </MudItem>
+                    <MudText Style="margin-left:10px;">
+                        @{
+                            string names = "";
+                            for (int i = 0; i < SelectedValues.ElementAt(0).Data.Count() - 1; i++)
+                            {
+                                names += SelectedValues.ElementAt(0).Data[i].Description + ", ";
+                            }
+                            names += SelectedValues.ElementAt(0).Data[SelectedValues.ElementAt(0).Data.Count() - 1].Description;
+                        }
+                        @names
+                    </MudText>
+                    <MudItem xs="12" Style="text-align: center;">
+                        <MudText Typo="Typo.body1">GPS positions</MudText>
+                    </MudItem>
+                    <MudGrid Justify="Justify.SpaceEvenly" Style="margin-top:1px;">
+                        <MudItem>
+                            <MudText> Left Bottom Position</MudText>
+                            <MudText Typo="Typo.body2">
+                                Width: @SelectedValues.ElementAt(0).Data.FirstOrDefault().LeftBottom.Width
+                            </MudText>
+                            <MudText Typo="Typo.body2">
+                                Height: @SelectedValues.ElementAt(0).Data.FirstOrDefault().LeftBottom.Height
+                            </MudText>
+                        </MudItem>
+                        <MudItem>
+                            <MudText> Right Top Position</MudText>
+                            <MudText Typo="Typo.body2">
+                                Width: @SelectedValues.ElementAt(0).Data.FirstOrDefault().RightTop.Width
+                            </MudText>
+                            <MudText Typo="Typo.body2">
+                                Height: @SelectedValues.ElementAt(0).Data.FirstOrDefault().RightTop.Height
+                            </MudText>
+                        </MudItem>
+                    </MudGrid>
+                </MudPaper>
+            }
+        </MudItem>
+    </MudGrid>
+}
+else
+{
+    <MudText Typo="Typo.caption">Tree is empty.</MudText>
+}
+
+@code {
+    [Parameter]
+    public string Name { get; set; }
+    [Parameter]
+    public KDTreeVisualizationNode<Estate>? VisualizationNode { get; set; }
+
+    private List<KDTreeVisualizationNode<Estate>> SelectedValues { get; set; } = new();
+    private List<TreeItemData<KDTreeVisualizationNode<Estate>>> TreeItems { get; set; } = new();
+
+    private List<TreeItemData<KDTreeVisualizationNode<Estate>>> lastAdded { get; set; } = new();
+
+    private void RemoveSelected()
+    {
+        SelectedValues.Clear();
+        StateHasChanged();
+    }
+    private TreeItemData<KDTreeVisualizationNode<Estate>>? AddTreeItem(KDTreeVisualizationNode<Estate> current, int level)
+    {
+
+        if (current != null)
+        {
+            var childrenList = new List<TreeItemData<KDTreeVisualizationNode<Estate>>>();
+            if (level != 0)
+            {
+                foreach (var item in current.Children)
+                {
+                    var child = AddTreeItem(item, level - 1);
+                    if (child != null)
+                    {
+                        childrenList.Add(child);
+                    }
+                }
+                if (level == 1)
+                {
+                    lastAdded.AddRange(childrenList);
+                }
+            }
+            string names = "";
+            for (int i = 0; i < current.Data.Count() - 1; i++)
+            {
+                names += current.Data[i].Description + ", ";
+            }
+            names += current.Data[current.Data.Count() - 1].Description;
+
+            return new TreeItemData<KDTreeVisualizationNode<Estate>>() { Children = childrenList, Text = names, Value = current, Expandable = true, Expanded = false };
+        }
+        return null;
+    }
+
+    private void ContextSelected(ref TreeItemData<KDTreeVisualizationNode<Estate>> node)
+    {
+        SelectedValues.Clear();
+        SelectedValues.Add(node.Value);
+    }
+
+
+    private void LoadMore()
+    {
+        var oldAdded = lastAdded;
+        lastAdded.Clear();
+        for (int i = 0; i < oldAdded.Count; i++)
+        {
+            var children = oldAdded[i].Value.Children;
+            var childrenList = new List<TreeItemData<KDTreeVisualizationNode<Estate>>>();
+            foreach (var item in children)
+            {
+                var child = AddTreeItem(item, 3);
+                if (child != null)
+                {
+                    childrenList.Add(child);
+                }
+            }
+            oldAdded[i].Children = childrenList;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        TreeItems.Clear();
+        var rootItem = AddTreeItem(VisualizationNode, 10);
+        if (rootItem != null)
+        {
+            TreeItems.Add(rootItem);
+            StateHasChanged();
+        }
+    }
+}

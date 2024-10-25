@@ -1,7 +1,65 @@
 ﻿@page "/"
+@page "/all"
+@using GUI.Components.Client
+@using GUI.Components.Individual
+@inject ClientClass ClientClass
+@inject ISnackbar Snackbar
+@inject Model Model
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<MudDialogProvider/>
+<MudPopoverProvider/>
+<MudSnackbarProvider/>
+<MudGrid>
+    <MudItem>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="InsertNew">Insert</MudButton>
+    </MudItem>
+    <MudItem>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="Find">Find</MudButton>
+    </MudItem>
+    <MudItem>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="LoadRandomTrees">Random Structures</MudButton>
+    </MudItem>
+    <MudItem>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="DeleteTrees">Delete Structures</MudButton>
+    </MudItem>
+    <MudItem>
+        <MudFileUpload T="IBrowserFile" Accept=".csv" FilesChanged="UploadFiles">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.CloudUpload">
+                    Upload File
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+    </MudItem>
+    <MudItem>
+        <MudButton StartIcon="@Icons.Material.Filled.FileDownload" Variant="Variant.Filled" Color="Color.Primary" OnClick="SaveFiles">Download File</MudButton>
+    </MudItem>
+</MudGrid>
 
-<h1>Hello, world!</h1>
+<MudPaper Style="margin-top:1%;margin-bottom:10%;padding:10px;">
 
-Welcome to your new app.
+@if (findResults != null && findResults.Count() > 0)
+{
+    <MudRadioGroup T="int" @bind-Value="PaperView">
+        <MudRadio Color="Color.Primary" Value="0">Tree View</MudRadio>
+        <MudRadio Color="Color.Secondary" Value="1"> Search Results</MudRadio>
+    </MudRadioGroup>
+    if (PaperView == 0)
+    {
+        <TreeView Name="All Estates" @key="Model.VisualizationNodeAll" VisualizationNode="Model.VisualizationNodeAll" />
+         <TreeView Name="Parcels" @key="Model.VisualizationNodeParcels" VisualizationNode="Model.VisualizationNodeParcels" />
+        <TreeView Name="Properties" @key="Model.VisualizationNodeProperties" VisualizationNode="Model.VisualizationNodeProperties" />
+    } else
+    {
+        <ResultView @key="findResults" List="findResults" />
+    }
+} else
+{
+    <TreeView Name="All Estates" @key="Model.VisualizationNodeAll" VisualizationNode="Model.VisualizationNodeAll"/>
+    <TreeView Name="Parcels" @key="Model.VisualizationNodeParcels" VisualizationNode="Model.VisualizationNodeParcels" />
+    <TreeView Name="Properties" @key="Model.VisualizationNodeProperties" VisualizationNode="Model.VisualizationNodeProperties" />
+}
+</MudPaper>
