@@ -1,4 +1,5 @@
 ﻿@using GUI.Components.Client
+@using static GUI.Components.Client.Model
 @inject ClientClass ClientClass
 
 <MudTable Items="@List" Dense="true" Filter="new Func<Estate,bool>(FilterFunc)">
@@ -15,19 +16,33 @@
         <MudTh>Height x1</MudTh>
         <MudTh>Width x2</MudTh>
         <MudTh>Height x2</MudTh>
-        <MudTh></MudTh>
-        <MudTh/>
+        <MudTh>References</MudTh>
+        <MudTh>Edit</MudTh>
+        <MudTh>Delete</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="Type">@context.GetType()</MudTd>
+        <MudTd DataLabel="Type">@context.GetType().Name</MudTd>
         <MudTd DataLabel="Number">@context.Number</MudTd>
         <MudTd DataLabel="Description">@context.Description</MudTd>
         <MudTd DataLabel="Width x1">@context.LeftBottom.Width</MudTd>
         <MudTd DataLabel="Height x1">@context.LeftBottom.Height</MudTd>
         <MudTd DataLabel="Width x2">@context.RightTop.Width</MudTd>
         <MudTd DataLabel="Height x2">@context.RightTop.Height</MudTd>
-        <MudTd><MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="edit" OnClick="() => Edit(context)"></MudIconButton></MudTd>
-        <MudTd><MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="() => Remove(context)"/></MudTd>
+        <MudTd DataLabel="References">
+            @if(context.References!= null && context.References.Count() > 0)
+            {
+                <MudExpansionPanels MultiExpansion="true">
+                    <MudExpansionPanel>
+                        @foreach (var item in context.References)
+                        {
+                            <MudText>@item.Description : @item.Number</MudText>
+                        }
+                    </MudExpansionPanel>
+                </MudExpansionPanels>
+            }
+            </MudTd>
+        <MudTd DataLabel="Edit"><MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="edit" OnClick="() => Edit(context)"></MudIconButton></MudTd>
+        <MudTd DataLabel="Delete"><MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="() => Remove(context)"/></MudTd>
 
     </RowTemplate>
     <PagerContent>
@@ -41,6 +56,11 @@
 @code {
     [Parameter]
     public List<Estate> List { get; set; }
+    [Parameter] 
+    public EventCallback OnEstatesChanged { get; set; }
+    [Parameter]
+    public EventCallback OnEstatesDeleted { get; set; }
+
     private string? searchString { get; set; }
 
     private bool FilterFunc(Estate estate)
@@ -52,14 +72,39 @@
         return estate.Description.Contains(searchString);
     }
 
-    private void Remove(Estate estate)
+    private async void Remove(Estate estate)
     {
         List.Remove(estate);
         ClientClass.RemoveEstate(estate);
+
+        if (OnEstatesDeleted.HasDelegate)
+        {
+            await OnEstatesDeleted.InvokeAsync();
+        }
     }
 
-    private void Edit(Estate estate)
+    private async  void Edit(Estate estate)
     {
-        
+        Parcel newParcel = new Parcel();
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+
+        var newEstate = new EstateModel() {  Description = estate.Description ?? "", Number = estate.Number ?? 0, X1 = estate.LeftBottom.Width, X2 = estate.RightTop.Width, Y1 = estate.LeftBottom.Height, Y2 = estate.RightTop.Height};
+        var parameters = new DialogParameters<InsertEstateDialog>
+            {
+                { nameof(InsertEstateDialog.Model), newEstate }
+            };
+
+        var result = await DialogService.Show<EditEstateDialog>("Estate Edit", parameters, options).Result;
+
+        if (result != null && !result.Canceled && result.Data != null && result.Data is EstateModel)
+        {
+            EstateModel model = (EstateModel)result.Data;
+            ClientClass.EditEstate(estate, model.Description, model.Number, model.X1, model.Y1, model.X2, model.Y2);
+        }
+
+        if (OnEstatesChanged.HasDelegate)
+        {
+            await OnEstatesChanged.InvokeAsync();
+        }
     }
 }

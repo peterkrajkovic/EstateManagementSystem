@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Classes
 {
-    public  abstract class Estate : IComparable<Estate>//, IKDTreeNodeClass<Estate>
+    public  abstract class Estate
     {
         public GPS LeftBottom { get; set; }
         public GPS RightTop { get; set; }
@@ -16,26 +16,17 @@ namespace Classes
         public string? Description { get; set; }
         public long Id { get; set; }
 
-        public  abstract string? GetDescription();
-        public abstract int? GetNumber();
-        public abstract void SetDescription(string description);
+        public List<Estate>? References { get; set; } = new();
 
-        public abstract void SetNumber(int number);
+        public abstract Estate Clone();
+        public abstract Estate CloneWithoutReferences();
+        public abstract void AddReference(Estate estate);
+        public abstract void RemoveReference(Estate estate);
+    }
 
-
-
-        public int CompareTo(Estate? other)
-        {
-            return LeftBottom.Width == other.LeftBottom.Width && LeftBottom.Height == other.LeftBottom.Height ? 0 : -1;
-        }
-
-        public int CompareTo(Estate other, int level)
-        {
-            throw new NotImplementedException();
-        }
-
-        public abstract void AddReference(ref Estate estate);
-        public abstract void RemoveReference(ref Estate estate);
-
+    public class KDTreeVisualizationNode
+    {
+        public List<Estate> Data { get; set; }
+        public List<KDTreeVisualizationNode> Children { get; set; } = new();
     }
 }

@@ -17,6 +17,7 @@ namespace Classes
         {
 
         }
+
         public GPS(GPS gps)
         {
             WidthChar = gps.WidthChar;

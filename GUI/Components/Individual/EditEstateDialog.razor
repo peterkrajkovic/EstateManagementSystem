@@ -1,21 +1,17 @@
-﻿@using static GUI.Components.Client.Model
+﻿@using GUI.Components.Client
+@using static GUI.Components.Client.Model
 @inject ISnackbar Snackbar
 <MudDialog>
     <TitleContent>
         @MudDialog.Title
     </TitleContent>
     <DialogContent>
-        <MudRadioGroup T="int" @bind-Value="Model.EstateType">
-            <MudRadio Value="0">Property</MudRadio>
-            <MudRadio Value="1">Parcel</MudRadio>
-        </MudRadioGroup>
         <MudTextField Label="Description" T="string" @bind-Value="Model.Description">
             Description
         </MudTextField>
         <MudTextField Label="Number" T="int" @bind-Value="Model.Number">
             Number
         </MudTextField>
-
         <MudPaper Elevation="1" Style="margin-top:1%;">
             <MudItem xs="12" Style="text-align: center;">
                 <MudText Typo="Typo.body1">GPS positions</MudText>
@@ -47,14 +43,17 @@
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
     [Parameter]
-    public EstateModel Model { get; set; }
+    public Model.EstateModel Model { get; set; }
 
-    private void Submit() {
-        if (Model.X1 != null && Model.X2 != null && Model.Y1 != null && Model.Number != null && Model.Description != null)
+    private void Submit()
+    {
+        if (Model != null && Model.X1 != null && Model.X2 != null && Model.Y1 != null && Model.Number != null && Model.Description != null)
             MudDialog.Close(DialogResult.Ok(Model));
         else
             Snackbar.Add("All fields must be assigned.", Severity.Error);
     }
 
     private void Cancel() => MudDialog.Cancel();
+
 }
+

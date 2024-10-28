@@ -9,6 +9,7 @@ namespace GUI.Components.Client
     {
 
         public Core Core { get; set; } = new Core();
+
         public bool InsertParcel(string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
             return Core.InsertParcel(description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
@@ -22,14 +23,18 @@ namespace GUI.Components.Client
             return Core.InsertProperty(description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
         }
 
+        public bool EditEstate(Estate oldEstate, string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        {
+            return Core.EditEstate(oldEstate,  description,  number,  leftBottomWidth,  leftBottomHeight,  rightTopWidth,  rightTopHeight);
+        }
         public void RemoveEstate(Estate p)
         {
             Core.RemoveEstate(p);
         }
 
-        public bool RemoveProperty(Property p)
+        public void RemoveProperty(Property p)
         {
-            return Core.RemoveProperty(p);
+            Core.RemoveProperty(p);
         }
 
         public List<Estate>? FindParcels(double leftBottomHeight, double leftBottomWidth, double rightTopHeight, double rightTopWidth)
@@ -62,15 +67,15 @@ namespace GUI.Components.Client
             return Core.RangeFindAll(width, height);
         }
 
-        public KDTreeVisualizationNode<Estate>? VisualizeAll()
+        public KDTreeVisualizationNode? VisualizeAll()
         {
             return Core.VisualizeAll();
         }
-        public KDTreeVisualizationNode<Estate>? VisualizeParcels()
+        public KDTreeVisualizationNode? VisualizeParcels()
         {
             return Core.VisualizeParcels();
         }
-        public KDTreeVisualizationNode<Estate>? VisualizeProperties()
+        public KDTreeVisualizationNode? VisualizeProperties()
         {
             return Core.VisualizeProperties();
         }

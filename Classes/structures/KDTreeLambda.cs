@@ -304,6 +304,7 @@ namespace Classes.structures
         {
             int level = 0;
             KDTreeLambdaNode<T>? current = GetRoot();
+            List<T> foundPoints = new();
 
             while (current != null)
             {
@@ -327,7 +328,14 @@ namespace Classes.structures
                         }
                         if (isSame)
                         {
-                            return current.Data;
+                            for (int i = 0; i < current.Data.Count(); i++)
+                            {
+                                if (current.Data[i].Equals(point))
+                                {
+                                    foundPoints.Add(current.Data[i]);
+                                }
+                            }
+                            return foundPoints;
                         }
                     }
 
@@ -399,51 +407,7 @@ namespace Classes.structures
             }
             return dataList;
         }
-        public KDTreeVisualizationNode<T>? CreateVisualizationTree()
-        {
-            if (Root == null)
-            {
-                return null;
-            }
-
-            // Stack to hold nodes for iterative traversal
-            var stack = new Stack<(KDTreeLambdaNode<T> originalNode, KDTreeVisualizationNode<T> visualNode)>();
-            var visualizationRoot = new KDTreeVisualizationNode<T>
-            {
-                Data = Root.Data
-            };
-
-            stack.Push((Root, visualizationRoot));
-
-            while (stack.Count > 0)
-            {
-                var (originalNode, visualNode) = stack.Pop();
-
-                // Process the left child
-                if (originalNode.Left != null)
-                {
-                    var leftVisualNode = new KDTreeVisualizationNode<T>
-                    {
-                        Data = originalNode.Left.Data
-                    };
-                    visualNode.Children.Add(leftVisualNode);
-                    stack.Push((originalNode.Left, leftVisualNode));
-                }
-
-                // Process the right child
-                if (originalNode.Right != null)
-                {
-                    var rightVisualNode = new KDTreeVisualizationNode<T>
-                    {
-                        Data = originalNode.Right.Data
-                    };
-                    visualNode.Children.Add(rightVisualNode);
-                    stack.Push((originalNode.Right, rightVisualNode));
-                }
-            }
-
-            return visualizationRoot;
-        }
+        
 
         public KDTreeLambdaNode<T>? GetRoot()
         {
@@ -461,10 +425,5 @@ namespace Classes.structures
                 Data = new List<T> { data };
             }
         }
-    }
-    public class KDTreeVisualizationNode<T>
-    {
-        public List<T> Data { get; set; }
-        public List<KDTreeVisualizationNode<T>> Children { get; set; } = new();
     }
 }

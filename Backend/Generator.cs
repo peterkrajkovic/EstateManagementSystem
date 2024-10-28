@@ -44,7 +44,7 @@ namespace Backend
         public static string GenerateRandomName(int length)
         {
             Random random = new Random();
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            const string chars = "ABCDEFGHIJKLMNOPRSTUVWYZ";
             var randomName = new char[length];
             for (int i = 0; i < length; i++)
             {
@@ -127,43 +127,6 @@ namespace Backend
             return added;
         }
 
-        /// <summary>
-        /// Function repeatedly adds/removes points of the inserted tree
-        /// </summary>
-        /// <param name="tree">KDTree</param>
-        /// <param name="operations">number of operations to be performed</param>
-        /// <returns>points that were added to the tree</returns>
-        //public static (List<double>, List<int[]>) RandomTreeOperation(ref KDTree<int, double> tree, int dimensions, int operations)
-        //{
-        //    Random rnd = new Random();
-        //    List<double> addedDoubles = new List<double>();
-        //    List<int[]> addedKeys = new List<int[]>();
-
-        //    for (int i = 0; i < operations; i++)
-        //    {
-        //        if (rnd.Next(1, 3) < 2)
-        //        {
-        //            //remove
-        //            if (addedDoubles.Count() > 0)
-        //            {
-        //                int position = rnd.Next(0, addedDoubles.Count());
-        //                tree.Remove(addedKeys[position], addedDoubles[position]);
-        //                addedDoubles.RemoveAt(position);
-        //                addedKeys.RemoveAt(position);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            //insert
-        //            int[] keys = new int[dimensions];
-        //            for (int j = 0; j < dimensions; j++)
-        //            {
-        //                keys[j] = rnd.Next(1, 200);
-        //            }
-        //            tree.Insert(keys, rnd.NextDouble());
-        //        }
-        //    }
-        //    return (addedDoubles, addedKeys);
-        //}
+       
     }
 }

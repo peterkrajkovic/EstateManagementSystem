@@ -7,6 +7,7 @@ using GUI.Components.Individual;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
+using static GUI.Components.Client.Model;
 
 namespace GUI.Components.Pages
 {
@@ -19,7 +20,8 @@ namespace GUI.Components.Pages
 
         private void LoadRandomTrees()
         {
-            ClientClass.LoadRandomTrees(1000,1000,10);
+            ClientClass.LoadRandomTrees(100,100,10);
+            findResults = null;
             VisualizeAll();
         }
         private void VisualizeAll()
@@ -29,19 +31,28 @@ namespace GUI.Components.Pages
             Model.VisualizationNodeProperties = ClientClass.VisualizeProperties();
             StateHasChanged();
         }
-       
+        private void EstateChanged()
+        {
+            findResults = null;
+            Snackbar.Add("Estate updated successfully.", Severity.Success);
+            VisualizeAll();
+        }
+
         private void UploadFiles(IBrowserFile file)
         {
             _files.Add(file);
             //TODO upload the files to the server
         }
+
         private void SaveFiles()
         {
 
         }
+
         private void DeleteTrees()
         {
             ClientClass.DeleteTrees();
+            findResults = null;
             VisualizeAll();
         }
 
@@ -53,8 +64,6 @@ namespace GUI.Components.Pages
             }
             StateHasChanged();
         }
-
-
 
         private async void Find()
         {
@@ -90,6 +99,9 @@ namespace GUI.Components.Pages
                 else if (findResults.Count() == 0)
                 {
                     Snackbar.Add("No estates are overlapping given position.", Severity.Normal);
+                } else
+                {
+                    PaperView = 1;
                 }
             }
         }
@@ -99,16 +111,16 @@ namespace GUI.Components.Pages
             Parcel newParcel = new Parcel();
             var options = new DialogOptions { CloseOnEscapeKey = true };
 
-            var estateModel = new InsertEstateDialog.EstateModel();
+            var estateModel = new EstateModel();
             var parameters = new DialogParameters<InsertEstateDialog>
             {
                 { nameof(InsertEstateDialog.Model), estateModel }
             };
 
             var result = await DialogService.Show<InsertEstateDialog>("Insert Estate", parameters, options).Result;
-            if (result != null && !result.Canceled && result.Data != null && result.Data is InsertEstateDialog.EstateModel)
+            if (result != null && !result.Canceled && result.Data != null && result.Data is EstateModel)
             {
-                InsertEstateDialog.EstateModel model = (InsertEstateDialog.EstateModel)result.Data;
+                EstateModel model = (EstateModel)result.Data;
                 switch (model.EstateType)
                 {
                     case 0:

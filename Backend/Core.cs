@@ -36,7 +36,15 @@ namespace Backend
             currentId++;
             ParcelTree.Insert(p);
             AllTree.Insert(p);
+            
             p.References = RangeFindProperties(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+            if (p.References != null)
+            {
+                for (int i = 0; i < p.References.Count(); i++)
+                {
+                    p.References[i].AddReference(p);
+                }
+            }
             return true;
         }
 
@@ -47,31 +55,62 @@ namespace Backend
             PropertyTree.Insert(p);
             AllTree.Insert(p);
             p.References = RangeFindParcels(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+            if (p.References != null)
+            {
+                for (int i = 0; i < p.References.Count(); i++)
+                {
+                    p.References[i].AddReference(p);
+                }
+            }
             return true;
         }
 
         #region Remove
-        public bool RemoveParcel(Parcel p)
+        public void RemoveParcel(Parcel p)
         {
             AllTree.Remove(p);
             ParcelTree.Remove(p);
-            return true;
+            var referenced = RangeFindProperties(p.LeftBottom.Width, p.LeftBottom.Height, p.RightTop.Width, p.RightTop.Height);
+            if (referenced == null)
+            {
+                return;
+            }
+            for (int i = 0;i < referenced.Count(); i++)
+            {
+                referenced[i].RemoveReference(p);
+            }
         }
-        public bool RemoveProperty(Property p)
+        public void RemoveProperty(Property p)
         {
             AllTree.Remove(p);
-            ParcelTree.Remove(p);
-            return true;
+            PropertyTree.Remove(p);
+            var referenced = RangeFindParcels(p.LeftBottom.Width, p.LeftBottom.Height, p.RightTop.Width, p.RightTop.Height);
+            if (referenced == null)
+            {
+                return;
+            }
+            for (int i = 0; i < referenced.Count(); i++)
+            {
+                referenced[i].RemoveReference(p);
+            }
         }
         public void RemoveEstate(Estate e)
         {
             if (e is Parcel)
             {
-                RemoveParcel((Parcel)e);
+                var foundParcel = ParcelTree.Find((Parcel)e);
+                if (foundParcel != null && foundParcel.Count() > 0)
+                {
+                    RemoveParcel((Parcel)foundParcel[0]);
+                }
             }
             else
             {
-                RemoveProperty((Property)e);
+                var foundProperty = PropertyTree.Find((Property)e);
+                if (foundProperty != null && foundProperty.Count() > 0)
+                {
+                    RemoveProperty((Property)foundProperty[0]);
+                }
             }
         }
         public void DeleteTrees()
@@ -82,6 +121,63 @@ namespace Backend
         }
         #endregion
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="oldParcel"></param>
+        /// <param name="newParcel"></param>
+        /// <returns>structures changed or not</returns>
+        public bool EditEstate(Estate oldEstate, string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        {
+            bool gpsChanged = IsGPSChanged(oldEstate, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+
+            if (oldEstate is Parcel)
+            {
+
+                var result = ParcelTree.Find(oldEstate);
+                if (result != null && result.Count() > 0)
+                {
+                    if (gpsChanged)
+                    {
+                        //GPS changed, remove estate and reinsert
+                        RemoveParcel((Parcel)result[0]);
+                        InsertParcel(description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+                    }
+                    else
+                    {
+                        result[0].Description = description;
+                        result[0].Number = number;
+                    }
+                }
+            }
+            else
+            {
+                var result = PropertyTree.Find(oldEstate);
+                if (result != null && result.Count() > 0)
+                {
+                    if (gpsChanged)
+                    {
+                        //GPS changed, remove estate and reinsert
+                        RemoveProperty((Property)result[0]);
+                        InsertProperty(description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+                    }
+                    else
+                    {
+                        result[0].Description = description;
+                        result[0].Number = number;
+                    }
+                }
+            }
+            return gpsChanged;
+        }
+
+        private bool IsGPSChanged(Estate oldEstate, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        {
+            return !(oldEstate.LeftBottom.Width.Equals(leftBottomWidth) 
+                    && oldEstate.LeftBottom.Height.Equals(leftBottomHeight) 
+                    && oldEstate.RightTop.Width.Equals(rightTopWidth) 
+                    && oldEstate.RightTop.Height.Equals(rightTopHeight));
+        }
         #region Find
         public List<Estate>? FindParcels(double leftBottomHeight, double leftBottomWidth, double rightTopHeight, double rightTopWidth)
         {
@@ -111,7 +207,10 @@ namespace Backend
             var newEstates = ParcelTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
-                estates.AddRange(newEstates);
+                foreach (var item in newEstates)
+                {
+                    estates.Add(item);
+                }
             }
 
             //2.nd scenario estates cross border on left bottom side of existing estate
@@ -120,7 +219,10 @@ namespace Backend
             newEstates = ParcelTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
-                estates.AddRange(newEstates);
+                foreach(var item in newEstates)
+                {
+                    estates.Add(item);
+                }
             }
 
             return estates.Distinct().ToList();
@@ -135,7 +237,10 @@ namespace Backend
             var newEstates = PropertyTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
-                estates.AddRange(newEstates);
+                foreach (var item in newEstates)
+                {
+                    estates.Add(item);
+                }
             }
 
             //2.nd scenario estates cross border on left bottom side of existing estate
@@ -144,7 +249,10 @@ namespace Backend
             newEstates = PropertyTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
-                estates.AddRange(newEstates);
+                foreach (var item in newEstates)
+                {
+                    estates.Add(item);
+                }
             }
 
             return estates.Distinct().ToList();
@@ -159,7 +267,10 @@ namespace Backend
             var newEstates = AllTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
-                estates.AddRange(newEstates);
+                foreach (var item in newEstates)
+                {
+                    estates.Add(item);
+                }
             }
 
             //2.nd scenario estates cross border on left bottom side of existing estate
@@ -168,7 +279,10 @@ namespace Backend
             newEstates = AllTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
-                estates.AddRange(newEstates);
+                foreach (var item in newEstates)
+                {
+                    estates.Add(item);
+                }
             }
 
             return estates.Distinct().ToList();
@@ -177,35 +291,66 @@ namespace Backend
         {
             Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(width, height), 0, "");
             Estate higherParcel = new Parcel(0, new GPS(width, height), new GPS(double.MaxValue, double.MaxValue), 0, "");
-            return ParcelTree.RangeFind(lowerParcel, higherParcel);
+
+            var estates = new List<Estate>();
+            var newEstates = ParcelTree.RangeFind(lowerParcel, higherParcel);
+            if (newEstates != null && newEstates.Count() > 0)
+            {
+                foreach (var item in newEstates)
+                {
+                    estates.Add(item.Clone());
+                }
+            }
+            return estates;
         }
         public List<Estate>? RangeFindProperties(double width, double height)
         {
             Property lowerProperty = new Property(0, new GPS(double.MinValue, double.MinValue), new GPS(width, height), 0, "");
             Property higherProperty = new Property(0, new GPS(width, height), new GPS(double.MaxValue, double.MaxValue), 0, "");
-            return PropertyTree.RangeFind(lowerProperty, higherProperty);
+
+            var estates = new List<Estate>();
+            var newEstates = PropertyTree.RangeFind(lowerProperty, higherProperty);
+            if (newEstates != null && newEstates.Count() > 0)
+            {
+                foreach (var item in newEstates)
+                {
+                    estates.Add(item.Clone());
+                }
+            }
+            return estates;
         }
         public List<Estate>? RangeFindAll(double width, double height)
         {
             Estate lowerProperty = new Property(0, new GPS(double.MinValue, double.MinValue), new GPS(width, height), 0, "");
             Estate higherProperty = new Property(0, new GPS(width, height), new GPS(double.MaxValue, double.MaxValue), 0, "");
-            return AllTree.RangeFind(lowerProperty, higherProperty);
+
+            var estates = new List<Estate>();
+            var newEstates = AllTree.RangeFind(lowerProperty, higherProperty);
+            if (newEstates != null && newEstates.Count() > 0)
+            {
+                foreach (var item in newEstates)
+                {
+                    estates.Add(item.Clone());
+                }
+            }
+            return estates;
         }
         #endregion
 
         #region Visualization
-        public KDTreeVisualizationNode<Estate>? VisualizeAll()
+        public KDTreeVisualizationNode? VisualizeAll()
         {
-            return AllTree.CreateVisualizationTree();
+            return Visualization.CreateVisualizationTree(AllTree.GetRoot());
         }
-        public KDTreeVisualizationNode<Estate>? VisualizeParcels()
+        public KDTreeVisualizationNode? VisualizeParcels()
         {
-            return ParcelTree.CreateVisualizationTree();
+            return Visualization.CreateVisualizationTree(ParcelTree.GetRoot());
         }
-        public KDTreeVisualizationNode<Estate>? VisualizeProperties()
+        public KDTreeVisualizationNode? VisualizeProperties()
         {
-            return PropertyTree.CreateVisualizationTree();
+            return Visualization.CreateVisualizationTree(PropertyTree.GetRoot());
         }
+
         #endregion
 
         #region Files
@@ -247,21 +392,35 @@ namespace Backend
         private void CreateParcel(ref long currentId, List<GPS> gps, List<Property> usedProperties, List<Parcel> usedParcels, Random random, int coverage)
         {
             UpdateGPSForParcel(gps, usedProperties, usedParcels, random, coverage);
-            Parcel parcel = new Parcel(currentId, gps[0], gps[1], random.Next(), Generator.GenerateRandomName(random.Next(4, 10)));
-            ParcelTree.Insert(parcel);
-            AllTree.Insert(parcel);
-            parcel.References = RangeFindProperties(gps[0].Width, gps[0].Height, gps[1].Width, gps[1].Height);
-            usedParcels.Add(parcel);
+            Parcel p = new Parcel(currentId, gps[0], gps[1], random.Next(1,999999), Generator.GenerateRandomName(random.Next(3, 7)));
+            ParcelTree.Insert(p);
+            AllTree.Insert(p);
+            p.References = RangeFindProperties(gps[0].Width, gps[0].Height, gps[1].Width, gps[1].Height);
+            if (p.References != null)
+            {
+                for (int i = 0; i < p.References.Count(); i++)
+                {
+                    p.References[i].AddReference(p);
+                }
+            }
+            usedParcels.Add(p);
         }
 
         private void CreateProperty(ref long currentId, List<GPS> gps, List<Property> usedProperties, List<Parcel> usedParcels, Random random, int coverage)
         {
             UpdateGPSForProperty(gps, usedProperties, usedParcels, random, coverage);
-            Property property = new Property(currentId, gps[0], gps[1], random.Next(), Generator.GenerateRandomName(random.Next(4, 10)));
-            PropertyTree.Insert(property);
-            AllTree.Insert(property);
-            property.References = RangeFindParcels(gps[0].Width, gps[0].Height, gps[1].Width, gps[1].Height);
-            usedProperties.Add(property);
+            Property p = new Property(currentId, gps[0], gps[1], random.Next(1,99999), Generator.GenerateRandomName(random.Next(3, 7)));
+            PropertyTree.Insert(p);
+            AllTree.Insert(p);
+            p.References = RangeFindParcels(gps[0].Width, gps[0].Height, gps[1].Width, gps[1].Height);
+            if (p.References != null)
+            {
+                for (int i = 0; i < p.References.Count(); i++)
+                {
+                    p.References[i].AddReference(p);
+                }
+            }
+            usedProperties.Add(p);
         }
 
         private void UpdateGPSForParcel(List<GPS> gps, List<Property> usedProperties, List<Parcel> usedParcels, Random random, int coverage)

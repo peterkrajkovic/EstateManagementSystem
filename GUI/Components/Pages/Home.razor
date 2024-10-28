@@ -54,7 +54,7 @@
         <TreeView Name="Properties" @key="Model.VisualizationNodeProperties" VisualizationNode="Model.VisualizationNodeProperties" />
     } else
     {
-        <ResultView @key="findResults" List="findResults" />
+        <ResultView OnEstatesDeleted="VisualizeAll" OnEstatesChanged="EstateChanged" @key="findResults" List="findResults" />
     }
 } else
 {

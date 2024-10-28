@@ -22,14 +22,16 @@
                     <MudItem xs="12" Style="text-align: center;">
                         <MudText Typo="Typo.h6">Selected Estate(s)</MudText>
                     </MudItem>
+                    <MudText Style="margin-left:10px;">Descritption : Number</MudText>
                     <MudText Style="margin-left:10px;">
                         @{
                             string names = "";
                             for (int i = 0; i < SelectedValues.ElementAt(0).Data.Count() - 1; i++)
                             {
-                                names += SelectedValues.ElementAt(0).Data[i].Description + ", ";
+                                names += SelectedValues.ElementAt(0).Data[i].Description + ": " + SelectedValues.ElementAt(0).Data[i].Number  + ", ";
                             }
-                            names += SelectedValues.ElementAt(0).Data[SelectedValues.ElementAt(0).Data.Count() - 1].Description;
+                            names += SelectedValues.ElementAt(0).Data[SelectedValues.ElementAt(0).Data.Count() - 1].Description + 
+                                        ": " + SelectedValues.ElementAt(0).Data[SelectedValues.ElementAt(0).Data.Count() - 1].Number;
                         }
                         @names
                     </MudText>
@@ -70,24 +72,24 @@ else
     [Parameter]
     public string Name { get; set; }
     [Parameter]
-    public KDTreeVisualizationNode<Estate>? VisualizationNode { get; set; }
+    public KDTreeVisualizationNode? VisualizationNode { get; set; }
 
-    private List<KDTreeVisualizationNode<Estate>> SelectedValues { get; set; } = new();
-    private List<TreeItemData<KDTreeVisualizationNode<Estate>>> TreeItems { get; set; } = new();
+    private List<KDTreeVisualizationNode> SelectedValues { get; set; } = new();
+    private List<TreeItemData<KDTreeVisualizationNode>> TreeItems { get; set; } = new();
 
-    private List<TreeItemData<KDTreeVisualizationNode<Estate>>> lastAdded { get; set; } = new();
+    private List<TreeItemData<KDTreeVisualizationNode>> lastAdded { get; set; } = new();
 
     private void RemoveSelected()
     {
         SelectedValues.Clear();
         StateHasChanged();
     }
-    private TreeItemData<KDTreeVisualizationNode<Estate>>? AddTreeItem(KDTreeVisualizationNode<Estate> current, int level)
+    private TreeItemData<KDTreeVisualizationNode>? AddTreeItem(KDTreeVisualizationNode current, int level)
     {
 
         if (current != null)
         {
-            var childrenList = new List<TreeItemData<KDTreeVisualizationNode<Estate>>>();
+            var childrenList = new List<TreeItemData<KDTreeVisualizationNode>>();
             if (level != 0)
             {
                 foreach (var item in current.Children)
@@ -110,12 +112,12 @@ else
             }
             names += current.Data[current.Data.Count() - 1].Description;
 
-            return new TreeItemData<KDTreeVisualizationNode<Estate>>() { Children = childrenList, Text = names, Value = current, Expandable = true, Expanded = false };
+            return new TreeItemData<KDTreeVisualizationNode>() { Children = childrenList, Text = names, Value = current, Expandable = true, Expanded = false };
         }
         return null;
     }
 
-    private void ContextSelected(ref TreeItemData<KDTreeVisualizationNode<Estate>> node)
+    private void ContextSelected(ref TreeItemData<KDTreeVisualizationNode> node)
     {
         SelectedValues.Clear();
         SelectedValues.Add(node.Value);
@@ -129,7 +131,7 @@ else
         for (int i = 0; i < oldAdded.Count; i++)
         {
             var children = oldAdded[i].Value.Children;
-            var childrenList = new List<TreeItemData<KDTreeVisualizationNode<Estate>>>();
+            var childrenList = new List<TreeItemData<KDTreeVisualizationNode>>();
             foreach (var item in children)
             {
                 var child = AddTreeItem(item, 3);

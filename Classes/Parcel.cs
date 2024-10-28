@@ -5,12 +5,32 @@ namespace Classes
 {
     public class Parcel : Estate
     {
-        
-        public List<Estate>? References { get; set; } = new();
         public Parcel()
         {
 
         }
+
+        public override Estate Clone()
+        {
+            var copy = (Parcel)this.MemberwiseClone();
+            var newRefs = new List<Estate>();
+            if (copy.References != null)
+            {
+                foreach (var x in copy.References)
+                {
+                    newRefs.Add(x.CloneWithoutReferences());
+                }
+            }
+            return copy;
+        }
+
+        public override Estate CloneWithoutReferences()
+        {
+            var copy = (Parcel)this.MemberwiseClone();
+            copy.References = null;
+            return copy;
+        }
+
         public Parcel(long id, GPS leftBottom, GPS rightTop, int parcelNumber, string parcelDescription) 
         {
             Id = id;
@@ -18,44 +38,44 @@ namespace Classes
             RightTop = rightTop;
             Description = parcelDescription;
             Number = parcelNumber;
+            References = [];
         }
 
-        public override string? GetDescription()
-        {
-            return Description;
-        }
-        public override int? GetNumber()
-        {
-            return Number;
-        }
-        public override void SetDescription(string description)
-        {
-            Description = description;
-        }
+      
 
-        public override void SetNumber(int number)
+        public override void AddReference(Estate estate)
         {
-            Number = number;
-        }
-
-        public override void AddReference(ref Estate estate)
-        {
+            if (References == null) References = new List<Estate>();
             References.Add(estate);
         }
-        public override void RemoveReference(ref Estate estate)
+
+        public override void RemoveReference(Estate estate)
         {
-            References.Remove(estate);
+            var refsToRemove = new List<Estate>();
+            for (int i = 0; i < References.Count; i++)
+            {
+                if (References[i].Equals(estate))
+                {
+                    refsToRemove.Add(estate);
+                    break;
+                }
+            }
+            for (int i = 0; i < refsToRemove.Count; i++)
+            {
+                References.Remove(refsToRemove[i]);
+            }
         }
 
-        public bool Equals(Parcel other)
+        public override bool Equals(Object? other)
         {
-            return     RightTop.Height.Equals(other.RightTop.Height)
-                    && RightTop.Width.Equals(other.RightTop.Width)
-                    && LeftBottom.Height.Equals(other.LeftBottom.Height)
-                    && LeftBottom.Width.Equals(other.LeftBottom.Width)
-                    && Number.Equals(other.Number)
-                    && Description.Equals(other.Description)
-                    && Id == other.Id;
+            return  other is Estate && other != null
+                    && RightTop.Height.Equals(((Estate)other).RightTop.Height)
+                    && RightTop.Width.Equals(((Estate)other).RightTop.Width)
+                    && LeftBottom.Height.Equals(((Estate)other).LeftBottom.Height)
+                    && LeftBottom.Width.Equals(((Estate)other).LeftBottom.Width)
+                    && Number.Equals(((Estate)other).Number)
+                    && Description.Equals(((Estate)other).Description)
+                    && Id == ((Estate)other).Id;
         }
     }
 }
