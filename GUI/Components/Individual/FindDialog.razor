@@ -9,13 +9,36 @@
             <MudRadio Value="1">Parcels</MudRadio>
             <MudRadio Value="2">All</MudRadio>
         </MudRadioGroup>
+        <MudRadioGroup T="int" @bind-Value="Model.GPS">
+            <MudRadio Value="0">By Point</MudRadio>
+            <MudRadio Value="1">By 2 Points</MudRadio>
+        </MudRadioGroup>
         <MudGrid>
-            <MudItem>
-                <MudTextField Label=" width" T="double" @bind-Value="Model.X">
+            @if (Model.GPS == 0)
+            {
+                <MudItem>
+                    <MudTextField Label=" width" T="double" @bind-Value="Model.X1">
                 </MudTextField>
-                <MudTextField T="double" Label="height" @bind-Value="Model.Y">
+                <MudTextField T="double" Label="height" @bind-Value="Model.Y1">
                 </MudTextField>
-            </MudItem>
+                </MudItem>
+            } else
+            {
+                <MudItem xs="6">
+                    <MudText>Left Bottom Point</MudText>
+                    <MudTextField Label=" width" T="double" @bind-Value="Model.X1">
+                    </MudTextField>
+                    <MudTextField T="double" Label="height" @bind-Value="Model.Y1">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudText>Right Top Point</MudText>
+                    <MudTextField Label=" width" T="double" @bind-Value="Model.X2">
+                    </MudTextField>
+                    <MudTextField T="double" Label="height" @bind-Value="Model.Y2">
+                    </MudTextField>
+                </MudItem>
+            }
         </MudGrid>
     </DialogContent>
     <DialogActions>
@@ -31,7 +54,7 @@
 
     private void Submit()
     {
-        if (Model.X != null && Model.Y != null)
+        if ((Model.GPS == 0 && Model.X1 != null && Model.Y1 != null) || (Model.GPS == 1 && Model.X1 != null && Model.Y2 != null && Model.X2 != null && Model.Y2 != null))
             MudDialog.Close(DialogResult.Ok(Model));
         else
             Snackbar.Add("All fields must be assigned.", Severity.Error);
@@ -44,8 +67,11 @@
 
     public class FindModel
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        public double X1 { get; set; }
+        public double Y1 { get; set; }
+        public double X2 { get; set; }
+        public double Y2 { get; set; }
+        public int GPS { get; set; }
         public int EstateType { get; set; } //0-Property, 1-Parcel, 2-All
     }
 }

@@ -83,13 +83,33 @@ namespace GUI.Components.Pages
                 switch (model.EstateType)
                 {
                     case 0:
-                        findResults = ClientClass.FindProperties(model.X, model.Y);
+                        if (model.GPS == 0)
+                        {
+                            findResults = ClientClass.FindProperties(model.X1, model.Y1);
+                        } else
+                        {
+                            findResults = ClientClass.RangeFindProperties(model.X1, model.Y1, model.X2, model.Y2);
+                        }
                         break;
                     case 1:
-                        findResults = ClientClass.FindParcels(model.X, model.Y);
+                        if (model.GPS == 0)
+                        {
+                            findResults = ClientClass.FindParcels(model.X1, model.Y1);
+                        }
+                        else
+                        {
+                            findResults = ClientClass.RangeFindParcels(model.X1, model.Y1, model.X2, model.Y2);
+                        }
                         break;
                     default:
-                        findResults = ClientClass.FindAll(model.X, model.Y);
+                        if (model.GPS == 0)
+                        {
+                            findResults = ClientClass.FindAll(model.X1, model.Y1);
+                        }
+                        else
+                        {
+                            findResults = ClientClass.RangeFindAll(model.X1, model.Y1, model.X2, model.Y2);
+                        }
                         break;
                 }
                 if (findResults == null )

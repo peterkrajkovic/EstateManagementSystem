@@ -11,7 +11,7 @@ namespace Backend
     public class Visualization
     {
 
-        public static KDTreeVisualizationNode? CreateVisualizationTree( KDTreeLambda<Estate>.KDTreeLambdaNode<Estate> root)
+        public static KDTreeVisualizationNode? CreateVisualizationTree(KDTree<Estate>.KDTreeNode<Estate> root)
         {
             if (root == null)
             {
@@ -19,7 +19,7 @@ namespace Backend
             }
 
             // Stack to hold nodes for iterative traversal
-            var stack = new Stack<(KDTreeLambda<Estate>.KDTreeLambdaNode<Estate> originalNode, KDTreeVisualizationNode visualNode)>();
+            var stack = new Stack<(KDTree<Estate>.KDTreeNode<Estate> originalNode, KDTreeVisualizationNode visualNode)>();
             var visualizationRoot = new KDTreeVisualizationNode
             {
                 Data = root.Data

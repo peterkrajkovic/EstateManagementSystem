@@ -6,7 +6,7 @@ namespace Backend
 {
     public class Core
     {
-        private static Func<Estate, Estate, int, int> compareFunc = (Estate first, Estate second, int level) =>
+        public static Func<Estate, Estate, int, int> compareFunc = (Estate first, Estate second, int level) =>
             {
                 switch (level)
                 {
@@ -24,15 +24,15 @@ namespace Backend
                 }
             };
 
-        private KDTreeLambda<Estate> AllTree { get; set; } = new KDTreeLambda<Estate>(4, compareFunc);
-        private KDTreeLambda<Estate> ParcelTree { get; set; } = new KDTreeLambda<Estate>(4, compareFunc);
-        private KDTreeLambda<Estate> PropertyTree { get; set; } = new KDTreeLambda<Estate>(4, compareFunc);
+        private KDTree<Estate> AllTree { get; set; } = new KDTree<Estate>(4, compareFunc);
+        private KDTree<Estate> ParcelTree { get; set; } = new KDTree<Estate>(4, compareFunc);
+        private KDTree<Estate> PropertyTree { get; set; } = new KDTree<Estate>(4, compareFunc);
         private long currentId = 0;
 
 
         public bool InsertParcel(string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
-            Parcel p = new Parcel(currentId, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopHeight, rightTopWidth), number, description);
+            Parcel p = new Parcel(currentId, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopWidth, rightTopHeight), number, description);
             currentId++;
             ParcelTree.Insert(p);
             AllTree.Insert(p);
@@ -50,7 +50,7 @@ namespace Backend
 
         public bool InsertProperty(string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
-            Property p = new Property(currentId, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopHeight, rightTopWidth), number, description);
+            Property p = new Property(currentId, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopWidth, rightTopHeight), number, description);
             currentId++;
             PropertyTree.Insert(p);
             AllTree.Insert(p);
@@ -115,9 +115,9 @@ namespace Backend
         }
         public void DeleteTrees()
         {
-            AllTree = new KDTreeLambda<Estate>(4, compareFunc);
-            ParcelTree = new KDTreeLambda<Estate>(4, compareFunc);
-            PropertyTree = new KDTreeLambda<Estate>(4, compareFunc);
+            AllTree = new KDTree<Estate>(4, compareFunc);
+            ParcelTree = new KDTree<Estate>(4, compareFunc);
+            PropertyTree = new KDTree<Estate>(4, compareFunc);
         }
         #endregion
 
@@ -284,7 +284,17 @@ namespace Backend
                     estates.Add(item);
                 }
             }
-
+            //3.rd scenario - estate is inside borders
+            Estate lowerParcel3 = new Parcel(0, new GPS(leftBottomWidth,leftBottomHeight), new GPS(leftBottomWidth, leftBottomHeight), 0, "");
+            Estate higherParcel3 = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(rightTopWidth, rightTopHeight), 0, "");
+            newEstates = AllTree.RangeFind(lowerParcel3, higherParcel3);
+            if (newEstates != null && newEstates.Count() > 0)
+            {
+                foreach (var item in newEstates)
+                {
+                    estates.Add(item);
+                }
+            }
             return estates.Distinct().ToList();
         }
         public List<Estate>? RangeFindParcels(double width, double height)
@@ -380,16 +390,16 @@ namespace Backend
 
                 if (usedProperties.Count == propertyCount || (usedParcels.Count < parcelCount && (random.Next(1, 3) < 2)))
                 {
-                    CreateParcel(ref currentId, gps, usedProperties, usedParcels, random, coverage);
+                    CreateParcel(currentId, gps, usedProperties, usedParcels, random, coverage);
                 }
                 else
                 {
-                    CreateProperty(ref currentId, gps, usedProperties, usedParcels, random, coverage);
+                    CreateProperty(currentId, gps, usedProperties, usedParcels, random, coverage);
                 }
             }
         }
 
-        private void CreateParcel(ref long currentId, List<GPS> gps, List<Property> usedProperties, List<Parcel> usedParcels, Random random, int coverage)
+        public Parcel CreateParcel(long currentId, List<GPS> gps, List<Property>? usedProperties, List<Parcel>? usedParcels, Random random, int coverage)
         {
             UpdateGPSForParcel(gps, usedProperties, usedParcels, random, coverage);
             Parcel p = new Parcel(currentId, gps[0], gps[1], random.Next(1,999999), Generator.GenerateRandomName(random.Next(3, 7)));
@@ -403,10 +413,15 @@ namespace Backend
                     p.References[i].AddReference(p);
                 }
             }
-            usedParcels.Add(p);
+            if (usedParcels != null)
+            {
+                usedParcels.Add(p);
+            }
+
+            return p;
         }
 
-        private void CreateProperty(ref long currentId, List<GPS> gps, List<Property> usedProperties, List<Parcel> usedParcels, Random random, int coverage)
+        private Property CreateProperty(long currentId, List<GPS> gps, List<Property> usedProperties, List<Parcel> usedParcels, Random random, int coverage)
         {
             UpdateGPSForProperty(gps, usedProperties, usedParcels, random, coverage);
             Property p = new Property(currentId, gps[0], gps[1], random.Next(1,99999), Generator.GenerateRandomName(random.Next(3, 7)));
@@ -420,12 +435,16 @@ namespace Backend
                     p.References[i].AddReference(p);
                 }
             }
-            usedProperties.Add(p);
+            if (usedProperties != null)
+            {
+                usedProperties.Add(p);
+            }
+            return p;
         }
 
-        private void UpdateGPSForParcel(List<GPS> gps, List<Property> usedProperties, List<Parcel> usedParcels, Random random, int coverage)
+        private void UpdateGPSForParcel(List<GPS> gps, List<Property>? usedProperties, List<Parcel>? usedParcels, Random random, int coverage)
         {
-            if (usedParcels.Count % coverage == 0 && usedProperties.Count > 0)
+            if (usedParcels != null && usedProperties != null && usedParcels.Count % coverage == 0 && usedProperties.Count > 0)
             {
                 int pos = random.Next(0, usedProperties.Count);
                 gps[0] = new GPS(usedProperties[pos].LeftBottom);
@@ -433,9 +452,9 @@ namespace Backend
             }
         }
 
-        private void UpdateGPSForProperty(List<GPS> gps, List<Property> usedProperties, List<Parcel> usedParcels, Random random, int coverage)
+        private void UpdateGPSForProperty(List<GPS> gps, List<Property>? usedProperties, List<Parcel>? usedParcels, Random random, int coverage)
         {
-            if (usedProperties.Count % coverage == 0 && usedParcels.Count > 0)
+            if (usedParcels != null && usedProperties != null && usedProperties.Count % coverage == 0 && usedParcels.Count > 0)
             {
                 int pos = random.Next(0, usedParcels.Count);
                 gps[0] = new GPS(usedParcels[pos].LeftBottom);

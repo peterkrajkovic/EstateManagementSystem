@@ -81,6 +81,7 @@
         {
             await OnEstatesDeleted.InvokeAsync();
         }
+        StateHasChanged();
     }
 
     private async  void Edit(Estate estate)

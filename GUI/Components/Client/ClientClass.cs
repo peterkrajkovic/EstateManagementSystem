@@ -46,6 +46,15 @@ namespace GUI.Components.Client
         {
             return Core.FindProperties(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
         }
+        public List<Estate>? RangeFindParcels(double leftBottomHeight, double leftBottomWidth, double rightTopHeight, double rightTopWidth)
+        {
+            return Core.RangeFindParcels(leftBottomHeight, leftBottomWidth, rightTopHeight, rightTopWidth);
+        }
+
+        public List<Estate>? RangeFindProperties(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        {
+            return Core.FindProperties(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+        }
 
         public List<Estate>? FindParcels(double width, double height)
         {
@@ -60,6 +69,10 @@ namespace GUI.Components.Client
         public List<Estate>? FindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
             return Core.FindAll(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+        }
+        public List<Estate>? RangeFindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        {
+            return Core.RangeFindAll(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
         }
 
         public List<Estate>? FindAll(double width, double height)

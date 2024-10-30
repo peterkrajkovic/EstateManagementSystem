@@ -53,7 +53,7 @@ namespace Backend
             return new string(randomName);
         }
 
-        public static List<Estate> RandomLambdaTreeOperation(ref KDTreeLambda<Estate> tree, int operations)
+        public static List<Estate> RandomLambdaTreeOperation(ref KDTree<Estate> tree, int operations)
         {
             List<Estate> added = new();
             Random rnd = new Random();
@@ -66,7 +66,7 @@ namespace Backend
                     //remove
                     int position = rnd.Next(0, added.Count());
                     Console.WriteLine("Removing " + added[position].GetType());
-                    int currentCount = tree.Count;
+                    long currentCount = tree.Count;
                     tree.Remove(added[position]);
                     if (tree.Count == currentCount - 1)
                     {
@@ -105,7 +105,7 @@ namespace Backend
                                                           : new Property(currentId, gps[0], gps[1], rnd.Next(1, 1000000), GenerateRandomName(rnd.Next(4, 7)));
                     currentId++;
                     Console.WriteLine("Inserting new " + newEstate.GetType());
-                    int currentCount = tree.Count;
+                    long currentCount = tree.Count;
                     tree.Insert(newEstate);
                     added.Add(newEstate);
                     if (tree.Count == currentCount + 1)
