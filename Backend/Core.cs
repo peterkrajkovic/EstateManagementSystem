@@ -118,6 +118,7 @@ namespace Backend
             AllTree = new KDTree<Estate>(4, compareFunc);
             ParcelTree = new KDTree<Estate>(4, compareFunc);
             PropertyTree = new KDTree<Estate>(4, compareFunc);
+            currentId = 0;
         }
         #endregion
 
@@ -135,6 +136,7 @@ namespace Backend
             {
 
                 var result = ParcelTree.Find(oldEstate);
+
                 if (result != null && result.Count() > 0)
                 {
                     if (gpsChanged)
@@ -179,21 +181,21 @@ namespace Backend
                     && oldEstate.RightTop.Height.Equals(rightTopHeight));
         }
         #region Find
-        public List<Estate>? FindParcels(double leftBottomHeight, double leftBottomWidth, double rightTopHeight, double rightTopWidth)
-        {
-            Parcel p = new Parcel(0, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopHeight, rightTopWidth), 0, "");
-            return ParcelTree.Find(p);
-        }
-        public List<Estate>? FindProperties(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
-        {
-            Parcel p = new Parcel(0, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopHeight, rightTopWidth), 0, "");
-            return PropertyTree.Find(p);
-        }
-        public List<Estate>? FindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
-        {
-            Parcel p = new Parcel(0, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopHeight, rightTopWidth), 0, "");
-            return AllTree.Find(p);
-        }
+        //public List<Estate>? FindParcels(double leftBottomHeight, double leftBottomWidth, double rightTopHeight, double rightTopWidth)
+        //{
+        //    Parcel p = new Parcel(0, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopHeight, rightTopWidth), 0, "");
+        //    return ParcelTree.Find(p);
+        //}
+        //public List<Estate>? FindProperties(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        //{
+        //    Parcel p = new Parcel(0, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopHeight, rightTopWidth), 0, "");
+        //    return PropertyTree.Find(p);
+        //}
+        //public List<Estate>? FindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        //{
+        //    Parcel p = new Parcel(0, new GPS(leftBottomWidth, leftBottomHeight), new GPS(rightTopHeight, rightTopWidth), 0, "");
+        //    return AllTree.Find(p);
+        //}
         #endregion
 
         #region RangeFind
@@ -201,9 +203,8 @@ namespace Backend
         {
             List<Estate> estates = new();
 
-            //1.st scenario - estates cross border on right top side of existing estate
             Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(leftBottomWidth, leftBottomHeight), 0, "");
-            Estate higherParcel = new Parcel(0, new GPS(leftBottomWidth, leftBottomHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
+            Estate higherParcel = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
             var newEstates = ParcelTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
@@ -213,27 +214,15 @@ namespace Backend
                 }
             }
 
-            //2.nd scenario estates cross border on left bottom side of existing estate
-            Estate lowerParcel2 = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(rightTopWidth, rightTopHeight), 0, "");
-            Estate higherParcel2 = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
-            newEstates = ParcelTree.RangeFind(lowerParcel, higherParcel);
-            if (newEstates != null && newEstates.Count() > 0)
-            {
-                foreach(var item in newEstates)
-                {
-                    estates.Add(item);
-                }
-            }
 
-            return estates.Distinct().ToList();
+            return estates.ToList();
         }
         public List<Estate>? RangeFindProperties(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
             List<Estate> estates = new();
 
-            //1.st scenario - estates cross border on right top side of existing estate
             Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(leftBottomWidth, leftBottomHeight), 0, "");
-            Estate higherParcel = new Parcel(0, new GPS(leftBottomWidth, leftBottomHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
+            Estate higherParcel = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
             var newEstates = PropertyTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
@@ -243,19 +232,7 @@ namespace Backend
                 }
             }
 
-            //2.nd scenario estates cross border on left bottom side of existing estate
-            Estate lowerParcel2 = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(rightTopWidth, rightTopHeight), 0, "");
-            Estate higherParcel2 = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
-            newEstates = PropertyTree.RangeFind(lowerParcel, higherParcel);
-            if (newEstates != null && newEstates.Count() > 0)
-            {
-                foreach (var item in newEstates)
-                {
-                    estates.Add(item);
-                }
-            }
-
-            return estates.Distinct().ToList();
+            return estates.ToList();
         }
         public List<Estate>? RangeFindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
@@ -263,7 +240,7 @@ namespace Backend
 
             //1.st scenario - estates cross border on right top side of existing estate
             Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(leftBottomWidth, leftBottomHeight), 0, "");
-            Estate higherParcel = new Parcel(0, new GPS(leftBottomWidth, leftBottomHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
+            Estate higherParcel = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
             var newEstates = AllTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
@@ -273,29 +250,7 @@ namespace Backend
                 }
             }
 
-            //2.nd scenario estates cross border on left bottom side of existing estate
-            Estate lowerParcel2 = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(rightTopWidth, rightTopHeight), 0, "");
-            Estate higherParcel2 = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
-            newEstates = AllTree.RangeFind(lowerParcel, higherParcel);
-            if (newEstates != null && newEstates.Count() > 0)
-            {
-                foreach (var item in newEstates)
-                {
-                    estates.Add(item);
-                }
-            }
-            //3.rd scenario - estate is inside borders
-            Estate lowerParcel3 = new Parcel(0, new GPS(leftBottomWidth,leftBottomHeight), new GPS(leftBottomWidth, leftBottomHeight), 0, "");
-            Estate higherParcel3 = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(rightTopWidth, rightTopHeight), 0, "");
-            newEstates = AllTree.RangeFind(lowerParcel3, higherParcel3);
-            if (newEstates != null && newEstates.Count() > 0)
-            {
-                foreach (var item in newEstates)
-                {
-                    estates.Add(item);
-                }
-            }
-            return estates.Distinct().ToList();
+            return estates.ToList();
         }
         public List<Estate>? RangeFindParcels(double width, double height)
         {
@@ -364,7 +319,72 @@ namespace Backend
         #endregion
 
         #region Files
+        public string SaveFile()
+        {
+            return FileHandler.SaveFile(ParcelTree, PropertyTree);
+        }
 
+        public bool LoadFile(string csvFile)
+        {
+            DeleteTrees();
+            bool readingParcels = true;
+            using (StringReader reader = new StringReader(csvFile))
+            {
+                string line;
+                bool firstLine = true;
+                while ((line = reader.ReadLine()) != null && line != string.Empty)
+                {
+                    //handle null values
+                    if (line.Contains("null"))
+                    {
+                        if (readingParcels)
+                        {
+                            ParcelTree = new KDTree<Estate>(4, compareFunc);
+                            readingParcels = false;
+                        } else
+                        {
+                            PropertyTree = new KDTree<Estate>(4, compareFunc);
+                            return true;
+                        }
+                    }
+
+                    //handle headers
+                    if (line.Contains("leftBottom"))
+                    {
+                        if (firstLine)
+                        {
+                            firstLine = false;
+                        } else
+                        {
+                            readingParcels = false;
+                        }
+                    }
+
+                    //handle estate 
+                    var estateData = FileHandler.ParseCsvLineToEstate(line);
+                    if (estateData != null && estateData.HasValue)
+                    {
+                        var (number, description, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight) = estateData.Value;
+
+                        if (readingParcels)
+                        {
+                            InsertParcel(description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+                        }
+                        else
+                        {
+                            InsertProperty(description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+                        }
+                    } else
+                    {
+                        //incorrect line
+                        DeleteTrees();
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
         #endregion
 
         #region Loader
@@ -378,14 +398,14 @@ namespace Backend
         {
             DeleteTrees();
 
-            List<Property> usedProperties = new();
-            List<Parcel> usedParcels = new();
+            List<Estate> usedProperties = new();
+            List<Estate> usedParcels = new();
             Random random = new Random();
             long currentId = 0;
 
             while (usedParcels.Count < parcelCount || usedProperties.Count < propertyCount)
             {
-                List<GPS> gps = Generator.GenerateRandomGPSLocation();
+                GPS[] gps = Generator.GenerateRandomGPSLocation();
                 currentId++;
 
                 if (usedProperties.Count == propertyCount || (usedParcels.Count < parcelCount && (random.Next(1, 3) < 2)))
@@ -399,9 +419,9 @@ namespace Backend
             }
         }
 
-        public Parcel CreateParcel(long currentId, List<GPS> gps, List<Property>? usedProperties, List<Parcel>? usedParcels, Random random, int coverage)
+        public Parcel CreateParcel(long currentId, GPS[] gps, List<Estate>? usedProperties, List<Estate>? usedParcels, Random random, int coverage)
         {
-            UpdateGPSForParcel(gps, usedProperties, usedParcels, random, coverage);
+            UpdateGPS(gps, usedParcels, usedProperties, random, coverage);
             Parcel p = new Parcel(currentId, gps[0], gps[1], random.Next(1,999999), Generator.GenerateRandomName(random.Next(3, 7)));
             ParcelTree.Insert(p);
             AllTree.Insert(p);
@@ -421,9 +441,9 @@ namespace Backend
             return p;
         }
 
-        private Property CreateProperty(long currentId, List<GPS> gps, List<Property> usedProperties, List<Parcel> usedParcels, Random random, int coverage)
+        private Property CreateProperty(long currentId, GPS[] gps, List<Estate> usedProperties, List<Estate> usedParcels, Random random, int coverage)
         {
-            UpdateGPSForProperty(gps, usedProperties, usedParcels, random, coverage);
+            UpdateGPS(gps, usedProperties, usedParcels, random, coverage);
             Property p = new Property(currentId, gps[0], gps[1], random.Next(1,99999), Generator.GenerateRandomName(random.Next(3, 7)));
             PropertyTree.Insert(p);
             AllTree.Insert(p);
@@ -442,23 +462,14 @@ namespace Backend
             return p;
         }
 
-        private void UpdateGPSForParcel(List<GPS> gps, List<Property>? usedProperties, List<Parcel>? usedParcels, Random random, int coverage)
-        {
-            if (usedParcels != null && usedProperties != null && usedParcels.Count % coverage == 0 && usedProperties.Count > 0)
-            {
-                int pos = random.Next(0, usedProperties.Count);
-                gps[0] = new GPS(usedProperties[pos].LeftBottom);
-                gps[1] = new GPS(usedProperties[pos].RightTop);
-            }
-        }
 
-        private void UpdateGPSForProperty(List<GPS> gps, List<Property>? usedProperties, List<Parcel>? usedParcels, Random random, int coverage)
+        private void UpdateGPS(GPS[] gps, List<Estate>? usedSame, List<Estate>? usedOthers, Random random, int coverage)
         {
-            if (usedParcels != null && usedProperties != null && usedProperties.Count % coverage == 0 && usedParcels.Count > 0)
+            if (usedOthers != null && usedSame != null && usedSame.Count % coverage == 0 && usedOthers.Count > 0)
             {
-                int pos = random.Next(0, usedParcels.Count);
-                gps[0] = new GPS(usedParcels[pos].LeftBottom);
-                gps[1] = new GPS(usedParcels[pos].RightTop);
+                int pos = random.Next(0, usedOthers.Count);
+                gps[0] = new GPS(usedOthers[pos].LeftBottom);
+                gps[1] = new GPS(usedOthers[pos].RightTop);
             }
         }
         #endregion

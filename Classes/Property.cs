@@ -8,6 +8,7 @@ namespace Classes
 {
     public class Property : Estate
     {
+        public Property() { }
 
         public Property(long id, GPS leftBottom, GPS rightTop, int propertyNumber, string propertyDescription)
         {

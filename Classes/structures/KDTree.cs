@@ -446,6 +446,7 @@ namespace Classes.structures
                                 }
                             }
                             return foundPoints;
+                            //return current.Data;
                         }
                     }
 
@@ -486,11 +487,12 @@ namespace Classes.structures
                 bool isInRange = true;
                 for (int i = 0; i < dimensions; i++)
                 {
-                    bool isAboveMin = compareFunc(lowerBound, current.Data[0], i) < 0;
-                    bool isUnderMax = compareFunc(higherBound, current.Data[0], i) > 0;
+                    bool isAboveMin = compareFunc(lowerBound, current.Data[0], i) <= 0;
+                    bool isUnderMax = compareFunc(higherBound, current.Data[0], i) >= 0;
                     if (!isAboveMin || !isUnderMax)
                     {
                         isInRange = false;
+                        break;
                     }
                 }
 
@@ -519,7 +521,38 @@ namespace Classes.structures
             }
             return dataList;
         }
-        
+
+        public IEnumerable<T> LevelOrderTraversal()
+        {
+            if (Root == null)
+            {
+                yield break;
+            }
+
+            Queue<KDTreeNode<T>> queue = new Queue<KDTreeNode<T>>();
+            queue.Enqueue(Root);
+
+            while (queue.Count > 0)
+            {
+                KDTreeNode<T> current = queue.Dequeue();
+
+                // Yield each point
+                foreach (var data in current.Data)
+                {
+                    yield return data;
+                }
+
+                //queue sons
+                if (current.Left != null)
+                {
+                    queue.Enqueue(current.Left);
+                }
+                if (current.Right != null)
+                {
+                    queue.Enqueue(current.Right);
+                }
+            }
+        }
 
         public KDTreeNode<T>? GetRoot()
         {

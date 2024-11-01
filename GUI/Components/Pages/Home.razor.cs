@@ -6,23 +6,33 @@ using GUI.Components.Client;
 using GUI.Components.Individual;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 using MudBlazor;
+using System.Text;
 using static GUI.Components.Client.Model;
 
 namespace GUI.Components.Pages
 {
     public partial class Home
     {
-      
-        private List<Estate>? findResults {  get; set; }
-        private IList<IBrowserFile> _files = new List<IBrowserFile>();
+        public static readonly string FILENAME = "estates.csv";
+        private List<Estate>? findResults { get; set; }
         private int PaperView { get; set; } = 0;
 
-        private void LoadRandomTrees()
+        private async void LoadRandomTrees()
         {
-            ClientClass.LoadRandomTrees(100,100,10);
-            findResults = null;
-            VisualizeAll();
+            var options = new DialogOptions { CloseOnEscapeKey = true };
+            var parameters = new DialogParameters<LoadRandomTreesDialog>();
+
+            var result = await DialogService.Show<LoadRandomTreesDialog>("Load Random Trees", options).Result;
+            if (result != null && !result.Canceled && result.Data != null && result.Data is LoadRandomTreesDialog.LoadRandomTreesDialogData)
+            {
+                var dialogData = (LoadRandomTreesDialog.LoadRandomTreesDialogData)result.Data;
+                int whichEvery = 100 / dialogData.Coverage;
+                ClientClass.LoadRandomTrees(dialogData.ParcelCount, dialogData.PropertyCount, whichEvery);
+                findResults = null;
+                VisualizeAll();
+            }
         }
         private void VisualizeAll()
         {
@@ -38,15 +48,50 @@ namespace GUI.Components.Pages
             VisualizeAll();
         }
 
-        private void UploadFiles(IBrowserFile file)
+        private async void UploadFiles(IBrowserFile file)
         {
-            _files.Add(file);
-            //TODO upload the files to the server
+            long maxFileSize = 1024 * 1024 * 100; // 100 MB
+
+
+            try
+            {
+                // Open a stream for reading
+                using var stream = file.OpenReadStream(maxFileSize);
+                using var reader = new StreamReader(stream);
+
+                // Read the stream as a string
+                string content = await reader.ReadToEndAsync();
+                if (content.Length > 0)
+                {
+                    if (ClientClass.LoadFile(content))
+                    {
+                        Snackbar.Add("File loaded correctly.", Severity.Success);
+                    }
+                    else
+                    {
+                        Snackbar.Add("File loaded incorrectly.", Severity.Error);
+                    }
+                }
+                else
+                {
+                    Snackbar.Add("File is empty.", Severity.Warning);
+                }
+            }
+            catch (IOException _) //stream could not be opened 
+            {
+                Snackbar.Add("File not loaded due to exceeded 100 MB limit.", Severity.Error);
+            }
         }
 
-        private void SaveFiles()
+        private async void SaveFiles()
         {
+            string fileText = ClientClass.SaveFile();
+            byte[] byteArray = Encoding.UTF8.GetBytes(fileText);
 
+            var fileStream = new MemoryStream(byteArray);
+            using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+            await JS.InvokeVoidAsync("downloadFileFromStream", FILENAME, streamRef);
         }
 
         private void DeleteTrees()
@@ -86,7 +131,8 @@ namespace GUI.Components.Pages
                         if (model.GPS == 0)
                         {
                             findResults = ClientClass.FindProperties(model.X1, model.Y1);
-                        } else
+                        }
+                        else
                         {
                             findResults = ClientClass.RangeFindProperties(model.X1, model.Y1, model.X2, model.Y2);
                         }
@@ -94,7 +140,7 @@ namespace GUI.Components.Pages
                     case 1:
                         if (model.GPS == 0)
                         {
-                            findResults = ClientClass.FindParcels(model.X1, model.Y1);
+                            findResults = ClientClass.RangeFindParcels(model.X1, model.Y1);
                         }
                         else
                         {
@@ -104,7 +150,7 @@ namespace GUI.Components.Pages
                     default:
                         if (model.GPS == 0)
                         {
-                            findResults = ClientClass.FindAll(model.X1, model.Y1);
+                            findResults = ClientClass.RangeFindAll(model.X1, model.Y1);
                         }
                         else
                         {
@@ -112,14 +158,15 @@ namespace GUI.Components.Pages
                         }
                         break;
                 }
-                if (findResults == null )
+                if (findResults == null)
                 {
                     Snackbar.Add("Tree has no estates. Add some first.", Severity.Normal);
-                } 
+                }
                 else if (findResults.Count() == 0)
                 {
                     Snackbar.Add("No estates are overlapping given position.", Severity.Normal);
-                } else
+                }
+                else
                 {
                     PaperView = 1;
                 }

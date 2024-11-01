@@ -10,6 +10,7 @@ namespace GUI.Components.Client
 
         public Core Core { get; set; } = new Core();
 
+        #region Insert
         public bool InsertParcel(string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
             return Core.InsertParcel(description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
@@ -23,10 +24,9 @@ namespace GUI.Components.Client
             return Core.InsertProperty(description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
         }
 
-        public bool EditEstate(Estate oldEstate, string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
-        {
-            return Core.EditEstate(oldEstate,  description,  number,  leftBottomWidth,  leftBottomHeight,  rightTopWidth,  rightTopHeight);
-        }
+        #endregion
+
+        #region Remove
         public void RemoveEstate(Estate p)
         {
             Core.RemoveEstate(p);
@@ -36,27 +36,19 @@ namespace GUI.Components.Client
         {
             Core.RemoveProperty(p);
         }
+        #endregion
 
-        public List<Estate>? FindParcels(double leftBottomHeight, double leftBottomWidth, double rightTopHeight, double rightTopWidth)
-        {
-            return Core.FindParcels(leftBottomHeight, leftBottomWidth, rightTopHeight, rightTopWidth);
-        }
-
-        public List<Estate>? FindProperties(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
-        {
-            return Core.FindProperties(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
-        }
-        public List<Estate>? RangeFindParcels(double leftBottomHeight, double leftBottomWidth, double rightTopHeight, double rightTopWidth)
-        {
-            return Core.RangeFindParcels(leftBottomHeight, leftBottomWidth, rightTopHeight, rightTopWidth);
-        }
-
+        #region RangeFind
         public List<Estate>? RangeFindProperties(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
-            return Core.FindProperties(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+            return Core.RangeFindProperties(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+        }
+        public List<Estate>? RangeFindParcels(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        {
+            return Core.RangeFindParcels(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
         }
 
-        public List<Estate>? FindParcels(double width, double height)
+        public List<Estate>? RangeFindParcels(double width, double height)
         {
             return Core.RangeFindParcels(width, height);
         }
@@ -66,20 +58,18 @@ namespace GUI.Components.Client
             return Core.RangeFindProperties(width, height);
         }
 
-        public List<Estate>? FindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
-        {
-            return Core.FindAll(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
-        }
         public List<Estate>? RangeFindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
             return Core.RangeFindAll(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
         }
 
-        public List<Estate>? FindAll(double width, double height)
+        public List<Estate>? RangeFindAll(double width, double height)
         {
             return Core.RangeFindAll(width, height);
         }
+        #endregion
 
+        #region Visualization
         public KDTreeVisualizationNode? VisualizeAll()
         {
             return Core.VisualizeAll();
@@ -92,9 +82,28 @@ namespace GUI.Components.Client
         {
             return Core.VisualizeProperties();
         }
+        #endregion
+
+
+        #region Files
+        public bool LoadFile(string file)
+        {
+            return Core.LoadFile(file);
+        }
+
+        public string SaveFile()
+        {
+            return Core.SaveFile();
+        }
+        #endregion
+
         public void  DeleteTrees()
         {
             Core.DeleteTrees();
+        }
+        public bool EditEstate(Estate oldEstate, string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        {
+            return Core.EditEstate(oldEstate, description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
         }
     }
 }
