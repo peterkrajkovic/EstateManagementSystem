@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
@@ -134,102 +135,7 @@ namespace Classes.structures
                             }
                             else  //remove node
                             {
-                                #region Remove if Node is Leaf
-                                //check if current is leaf
-                                if (current.Left == null && current.Right == null)
-                                {
-                                    if (parent == null)
-                                    {
-                                        //node is root
-                                        Root = null;
-                                    }
-                                    else
-                                    {
-                                        if (isLeftChild)
-                                        {
-                                            parent.Left = null;
-                                        }
-                                        else
-                                        {
-                                            parent.Right = null;
-                                        }
-                                    }
-                                    return;
-                                }
-                                #endregion
-
-                                #region Remove by Successor or Predecessor
-
-                                KDTreeNode<T> subNode = current;
-                                int currentDimension = level;
-                                List<T> reinsertNodes = new();
-
-
-                                while (subNode.Left != null || subNode.Right != null)
-                                {
-                                    currentDimension = (currentDimension + 1) % dimensions;
-                                    List<KDTreeNode<T>> subNodes;
-                                    if (subNode.Left != null)
-                                    {
-                                        FindPredecessorByDimension(subNode.Left, level, ref currentDimension, out subNodes);
-                                    }
-                                    else
-                                    {
-                                        FindSuccessorsByDimension(subNode.Right!, level, ref currentDimension, out subNodes);
-                                    }
-                                    level = currentDimension;
-
-                                    if (subNodes != null && subNodes.Count() > 0)
-                                    {
-                                        //take first node
-                                        subNode = subNodes[0];
-                                        subNodes.RemoveAt(0);
-
-                                        //swap data 
-                                        var data = subNode.Data;
-                                        subNode.Data = current.Data;
-                                        current.Data = data;
-
-                                        current = subNode;
-
-                                        //Remove points with same key at wanted dimension
-                                        if (subNodes.Count() > 0)
-                                        {
-                                            foreach (var item in subNodes)
-                                            {
-                                                foreach (var d in item.Data)
-                                                {
-                                                    Remove(d);
-                                                    reinsertNodes.Add(d);
-                                                }
-                                            }
-
-                                        }
-                                    } else
-                                    {
-                                        return;
-                                    }
-                                }
-
-                                //final remove
-                                if (subNode.Parent.Left != null && subNode == subNode.Parent.Left)
-                                {
-                                    subNode.Parent.Left = null;
-                                }
-                                else
-                                {
-                                    subNode.Parent.Right = null;
-                                }
-
-                                //reinsert points
-                                if (reinsertNodes != null && reinsertNodes.Count() > 0)
-                                {
-                                    foreach (var item in reinsertNodes)
-                                    {
-                                        Insert(item);
-                                    }
-                                }
-                                #endregion
+                                RemoveNode(current,level);
 
                                 return;
                             }
@@ -250,11 +156,116 @@ namespace Classes.structures
 
             }
         }
+        private void RemoveNode(KDTreeNode<T> currentNode, int currentLevel)
+        {
+            List<(KDTreeNode<T>, int)> nodesToRemove = new() { (currentNode, currentLevel) };
+            List<T> reinsertNodes = new();
 
-        public void FindPredecessorByDimension(KDTreeNode<T> root, int dimension, ref int currentDimension, out List<KDTreeNode<T>> predecessors)
+            while (nodesToRemove != null && nodesToRemove.Count() > 0)
+            {
+                KDTreeNode<T> current = nodesToRemove[0].Item1;
+                int level = nodesToRemove[0].Item2;
+                nodesToRemove.RemoveAt(0);
+
+                #region Remove if Node is Leaf
+                //check if current is leaf
+                if (current.Left == null && current.Right == null)
+                {
+                    if (current.Parent == null)
+                    {
+                        //node is root
+                        Root = null;
+                    }
+                    else
+                    {
+                        if (current.Parent.Left == current)
+                        {
+                            current.Parent.Left = null;
+                        }
+                        else
+                        {
+                            current.Parent.Right = null;
+                        }
+                    }
+                    return;
+                }
+                #endregion
+
+                KDTreeNode<T> subNode = current;
+                int currentDimension = level;
+
+                while (subNode.Left != null || subNode.Right != null)
+                {
+                    currentDimension = (currentDimension + 1) % dimensions;
+                    List<(KDTreeNode<T>, int)> subNodes;
+                    if (subNode.Left != null)
+                    {
+                        FindPredecessorByDimension(subNode.Left, level, ref currentDimension, out subNodes);
+                    }
+                    else
+                    {
+                        FindSuccessorsByDimension(subNode.Right!, level, ref currentDimension, out subNodes);
+                    }
+                    level = currentDimension;
+
+                    if (subNodes != null && subNodes.Count() > 0)
+                    {
+                        //take first node
+                        subNode = subNodes[0].Item1;
+                        subNodes.RemoveAt(0);
+
+                        //swap data 
+                        var data = subNode.Data;
+                        subNode.Data = current.Data;
+                        current.Data = data;
+
+                        current = subNode;
+
+                        //Remove points with same key at wanted dimension
+                        if (subNodes.Count() > 0)
+                        {
+                            foreach (var item in subNodes)
+                            {
+                                nodesToRemove.Add((item));
+                                foreach (var d in item.Item1.Data)
+                                {
+                                    reinsertNodes.Add(d);
+                                }
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        throw new ApplicationException("No replacement node found.");
+                    }
+                }
+
+                //final remove
+                if (subNode.Parent.Left != null && subNode == subNode.Parent.Left)
+                {
+                    subNode.Parent.Left = null;
+                }
+                else
+                {
+                    subNode.Parent.Right = null;
+                }
+            }
+
+            //reinsert points
+            if (reinsertNodes != null && reinsertNodes.Count() > 0)
+            {
+                foreach (var item in reinsertNodes)
+                {
+                    Insert(item);
+                }
+            }
+            
+        }
+        public void FindPredecessorByDimension(KDTreeNode<T> root, int dimension, ref int currentDimension, out List<(KDTreeNode<T>,int)> predecessors)
         {
             KDTreeNode<T> current = root;
-            predecessors = new() { root };
+            predecessors = new() { (root,currentDimension) };
             List<(KDTreeNode<T>, int)> nextToProcess = new();
             int currentLevel = currentDimension;
 
@@ -274,10 +285,10 @@ namespace Classes.structures
                 nextToProcess.RemoveAt(0);
 
                 //update predecessors
-                if (compareFunc(current.Data[0], predecessors[0].Data[0], dimension) > 0)
+                if (compareFunc(current.Data[0], predecessors[0].Item1.Data[0], dimension) > 0)
                 {
                     predecessors.Clear();
-                    predecessors.Add(current);
+                    predecessors.Add((current, dimension));
                     currentDimension = currentLevel;
                 }
 
@@ -307,10 +318,10 @@ namespace Classes.structures
         }
 
 
-        public void FindSuccessorsByDimension(KDTreeNode<T> root, int dimension, ref int currentDimension, out List<KDTreeNode<T>> successors)
+        public void FindSuccessorsByDimension(KDTreeNode<T> root, int dimension, ref int currentDimension, out List<(KDTreeNode<T>,int)> successors)
         {
             KDTreeNode<T> current = root;
-            successors = new() { root };
+            successors = new() { (root, currentDimension) };
 
             List<(KDTreeNode<T>, int)> nextToProcess = new();
             int currentLevel = currentDimension;
@@ -331,14 +342,14 @@ namespace Classes.structures
                 nextToProcess.RemoveAt(0);
 
                 //update successors
-                if (compareFunc(current.Data[0], successors[0].Data[0], dimension) == 0)
+                if (compareFunc(current.Data[0], successors[0].Item1.Data[0], dimension) == 0)
                 {
-                    successors.Add(current);
+                    successors.Add((current, currentLevel));
                 }
-                else if (compareFunc(current.Data[0], successors[0].Data[0], dimension) < 0)
+                else if (compareFunc(current.Data[0], successors[0].Item1.Data[0], dimension) < 0)
                 {
                     successors.Clear();
-                    successors.Add(current);
+                    successors.Add((current,currentLevel));
                     currentDimension = currentLevel;
                 }
 

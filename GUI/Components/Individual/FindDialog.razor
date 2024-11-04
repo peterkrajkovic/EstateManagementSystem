@@ -10,9 +10,14 @@
             <MudRadio Value="2">All</MudRadio>
         </MudRadioGroup>
         <MudRadioGroup T="int" @bind-Value="Model.GPS">
-            <MudRadio Value="0">By Point</MudRadio>
+            <MudRadio Value="0">By 1 Point</MudRadio>
             <MudRadio Value="1">By 2 Points</MudRadio>
         </MudRadioGroup>
+        <MudItem xs="2">
+            <MudTooltip Text="For west width or south height please use negative number" Placement="Placement.Right">
+                <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Primary" />
+            </MudTooltip>
+        </MudItem>
         <MudGrid>
             @if (Model.GPS == 0)
             {

@@ -6,7 +6,7 @@ using Test;
 using static Backend.Generator;
 
 KDTreeTest t = new();
-t.RandomOperationTest(1000);
+t.RandomOperationTest(1000000);
 
 
 

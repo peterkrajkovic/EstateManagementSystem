@@ -69,7 +69,7 @@ namespace Test
         #endregion
 
         [DataTestMethod]
-        [DataRow(100000)]
+        [DataRow(1000000)]
         public void RandomOperationTest(int operations)
         {
             KDTree<CustomClass> tree = new KDTree<CustomClass>(4, customCompareFunc);
@@ -129,7 +129,6 @@ namespace Test
                         else if ((list != null) && item.Equals(added[position]))
                         {
                             Console.Error.WriteLine($"Operation {i + 1}. Item was not removed properly");
-                            tree.Remove(added[position]);
                             failed++;
                         }
                     }

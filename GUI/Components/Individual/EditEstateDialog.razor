@@ -12,10 +12,18 @@
         <MudTextField Label="Number" T="int" @bind-Value="Model.Number">
             Number
         </MudTextField>
-        <MudPaper Elevation="1" Style="margin-top:1%;">
-            <MudItem xs="12" Style="text-align: center;">
-                <MudText Typo="Typo.body1">GPS positions</MudText>
-            </MudItem>
+        <MudPaper Elevation="0" Style="margin-top:1%;">
+            <MudGrid>
+                <MudItem xs="10" Style="text-align: center;">
+                    <MudText style="margin-top: 12px;" Typo="Typo.body1">GPS positions</MudText>
+                </MudItem>
+                <MudItem xs="2">
+                    <MudTooltip Text="For west width or south height please use negative number" Placement="Placement.Right">
+                        <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Primary" />
+                    </MudTooltip>
+                </MudItem>
+
+            </MudGrid>
             <MudGrid Style="margin-top:5px;">
                 <MudItem>
                     <MudText Typo="Typo.body2"> Left Bottom Position</MudText>
