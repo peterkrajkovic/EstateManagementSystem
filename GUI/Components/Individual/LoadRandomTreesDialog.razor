@@ -6,11 +6,11 @@
     </TitleContent>
     <DialogContent>
        
-        <MudTextField  Label="Number of Parcels" T="int" @bind-Value="Data.ParcelCount">
+        <MudTextField  Label="Number of Parcels" T="int?" @bind-Value="Data.ParcelCount">
         </MudTextField>
-        <MudTextField Label="Number of Properties" T="int" @bind-Value="Data.PropertyCount">
+        <MudTextField Label="Number of Properties" T="int?" @bind-Value="Data.PropertyCount">
         </MudTextField>
-        <MudTextField Min="0" Max="100" Label="Coverage %" T="int" @bind-Value="Data.Coverage">
+        <MudTextField Min="0" Max="100" Label="Coverage %" T="int?" @bind-Value="Data.Coverage">
         </MudTextField>
 
       
@@ -38,8 +38,8 @@
 
     public class LoadRandomTreesDialogData
     {
-    public int ParcelCount { get; set; }
-    public int PropertyCount { get; set; }
-    public int Coverage { get; set; }
+    public int? ParcelCount { get; set; }
+    public int? PropertyCount { get; set; }
+    public int? Coverage { get; set; }
     }
 }

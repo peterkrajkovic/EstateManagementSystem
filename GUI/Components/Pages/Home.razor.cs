@@ -28,8 +28,7 @@ namespace GUI.Components.Pages
             if (result != null && !result.Canceled && result.Data != null && result.Data is LoadRandomTreesDialog.LoadRandomTreesDialogData)
             {
                 var dialogData = (LoadRandomTreesDialog.LoadRandomTreesDialogData)result.Data;
-                int whichEvery = 100 / dialogData.Coverage;
-                ClientClass.LoadRandomTrees(dialogData.ParcelCount, dialogData.PropertyCount, whichEvery);
+                ClientClass.LoadRandomTrees((int)dialogData.ParcelCount, (int)dialogData.PropertyCount, (int)dialogData.Coverage);
                 findResults = null;
                 VisualizeAll();
             }
@@ -66,6 +65,7 @@ namespace GUI.Components.Pages
                     if (ClientClass.LoadFile(content))
                     {
                         Snackbar.Add("File loaded correctly.", Severity.Success);
+                        VisualizeAll();
                     }
                     else
                     {
@@ -130,31 +130,31 @@ namespace GUI.Components.Pages
                     case 0:
                         if (model.GPS == 0)
                         {
-                            findResults = ClientClass.FindProperties(model.X1, model.Y1);
+                            findResults = ClientClass.FindProperties((double)model.X1, (double)model.Y1);
                         }
                         else
                         {
-                            findResults = ClientClass.RangeFindProperties(model.X1, model.Y1, model.X2, model.Y2);
+                            findResults = ClientClass.RangeFindProperties((double)model.X1, (double)model.Y1, (double)model.X2, (double)model.Y2);
                         }
                         break;
                     case 1:
-                        if (model.GPS == 0)
+                        if ((double)model.GPS == 0)
                         {
-                            findResults = ClientClass.RangeFindParcels(model.X1, model.Y1);
+                            findResults = ClientClass.RangeFindParcels((double)model.X1, (double)model.Y1);
                         }
                         else
                         {
-                            findResults = ClientClass.RangeFindParcels(model.X1, model.Y1, model.X2, model.Y2);
+                            findResults = ClientClass.RangeFindParcels((double)model.X1, (double)model.Y1, (double)model.X2, (double)model.Y2);
                         }
                         break;
                     default:
                         if (model.GPS == 0)
                         {
-                            findResults = ClientClass.RangeFindAll(model.X1, model.Y1);
+                            findResults = ClientClass.RangeFindAll((double)model.X1, (double)model.Y1);
                         }
                         else
                         {
-                            findResults = ClientClass.RangeFindAll(model.X1, model.Y1, model.X2, model.Y2);
+                            findResults = ClientClass.RangeFindAll((double)model.X1, (double)model.Y1, (double)model.X2, (double)model.Y2);
                         }
                         break;
                 }

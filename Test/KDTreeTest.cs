@@ -14,6 +14,8 @@ namespace Test
     [TestClass]
     public class KDTreeTest
     {
+
+        #region Structs for RandomOperationTest
         private static Func<CustomClass, CustomClass, int, int> customCompareFunc = (CustomClass first, CustomClass second, int level) =>
         {
             switch (level)
@@ -64,9 +66,10 @@ namespace Test
                 return $"Custom Class A: {A}, B: {B}, C: {C}, D: {D}";
             }
         }
+        #endregion
 
         [DataTestMethod]
-        [DataRow(10000)]
+        [DataRow(100000)]
         public void RandomOperationTest(int operations)
         {
             KDTree<CustomClass> tree = new KDTree<CustomClass>(4, customCompareFunc);
@@ -83,7 +86,7 @@ namespace Test
                 {
                     //remove
                     int position = rnd.Next(0, added.Count());
-                    Console.WriteLine("Removing " + added[position].ToString());
+                    Console.WriteLine($"Operation {i + 1}. Removing " + added[position].ToString());
                     long currentCount = tree.Count;
                     tree.Remove(added[position]);
                     if (tree.Count == currentCount - 1)
@@ -92,12 +95,12 @@ namespace Test
                     }
                     else if (tree.Count >= currentCount)
                     {
-                        Console.Error.WriteLine("1 item was not removed. Previous count: " + currentCount + ", current count: " + tree.Count);
+                        Console.Error.WriteLine($"Operation {i + 1}. 1 item was not removed. Previous count: " + currentCount + ", current count: " + tree.Count);
                         failed++;
                     }
                     else
                     {
-                        Console.Error.WriteLine("Too many items were removed. Previous count: " + currentCount + ", current count: " + tree.Count);
+                        Console.Error.WriteLine($"Operation {i + 1}. Too many items were removed. Previous count: " + currentCount + ", current count: " + tree.Count);
                         failed++;
                     }
 
@@ -105,14 +108,27 @@ namespace Test
                     foreach (var item in added)
                     {
                         var list = tree.Find(item);
-                        if ((list == null || list.Count() == 0) && !item.Equals(added[position]))
+                        bool notFoundInList = true;
+                        if (list != null)
                         {
-                            Console.Error.WriteLine("Added item was removed without permission");
+                            foreach (var it in list)
+                            {
+                                if (it.Equals(item))
+                                {
+                                    notFoundInList = false;
+                                }
+                            }
+                        }
+
+                        if ((list == null || notFoundInList) && !item.Equals(added[position]))
+                        {
+                            Console.Error.WriteLine($"Operation {i + 1}. Added item {item.ToString()} was removed without permission");
+                            var l = tree.Find(item);
                             failed++;
                         }
                         else if ((list != null) && item.Equals(added[position]))
                         {
-                            Console.Error.WriteLine("Item was not removed properly");
+                            Console.Error.WriteLine($"Operation {i + 1}. Item was not removed properly");
                             tree.Remove(added[position]);
                             failed++;
                         }
@@ -125,7 +141,7 @@ namespace Test
 
                     CustomClass newItem = new CustomClass() { A = rnd.NextDouble(), B = "", C = rnd.Next(), D = rnd.NextDouble() };
                     currentId++;
-                    Console.WriteLine("Inserting new " + newItem.ToString());
+                    Console.WriteLine($"Operation {i+1}. Inserting " + newItem.ToString());
                     long currentCount = tree.Count;
                     tree.Insert(newItem);
                     added.Add(newItem);
@@ -137,13 +153,13 @@ namespace Test
                     }
                     else
                     {
-                        Console.Error.WriteLine("1 item was not added");
+                        Console.Error.WriteLine($"Operation {i+1}. 1 item was not added");
                         failed++;
                     }
                     var list = tree.Find(newItem);
                     if (list == null || list.Count() == 0)
                     {
-                        Console.Error.WriteLine("Added item was not found");
+                        Console.Error.WriteLine($"Operation {i + 1}. Added item was not found");
                         failed++;
                     }
 
@@ -235,6 +251,96 @@ namespace Test
                 }
             }
             Assert.AreEqual(failed, 0);
+        }
+
+
+        #region Structs For RemoveTest
+        class RemoveClass
+
+        {
+            public int X;
+            public int Y;
+        }
+        Func<RemoveClass, RemoveClass, int, int> compareFuncRemove = (RemoveClass first, RemoveClass second, int level) =>
+        {
+            switch (level)
+            {
+                case 0:
+                    return first.X.CompareTo(second.X);
+                case 1:
+                    return first.Y.CompareTo(second.Y);
+                default:
+                    return 0;
+            }
+        };
+        #endregion
+
+        [TestMethod]
+        public void RemoveTest()
+        {
+            var tree = new KDTree<RemoveClass>(2, compareFuncRemove);
+            var x1 = new RemoveClass() { X = 10, Y = 10 };
+            var x2 = new RemoveClass() { X = 8, Y = 10 };
+            var x3 = new RemoveClass() { X = 10, Y = 20 };
+            var x4 = new RemoveClass() { X = 15, Y = 12 };
+            var x5 = new RemoveClass() { X = 5, Y = 7 };
+            var x6 = new RemoveClass() { X = 9, Y = 12 };
+            var x7 = new RemoveClass() { X = 10, Y = 20 };
+            var x8 = new RemoveClass() { X = 12, Y = 13 };
+            var x9 = new RemoveClass() { X = 11, Y = 13 };
+            var x10 = new RemoveClass() { X = 11, Y = 14 };
+            var x11 = new RemoveClass() { X = 15, Y = 10 };
+            var x12 = new RemoveClass() { X = 17, Y = 11 };
+            var x13 = new RemoveClass() { X = 12, Y = 14 };
+            var x14 = new RemoveClass() { X = 15, Y = 15 };
+
+
+            tree.Insert(x1);
+            tree.Insert(x2);
+            tree.Insert(x3);
+            tree.Insert(x4);
+            tree.Insert(x5);
+            tree.Insert(x6);
+            tree.Insert(x7);
+            tree.Insert(x8);
+            tree.Insert(x9);
+            tree.Insert(x10);
+            tree.Insert(x11);
+            tree.Insert(x12);
+            tree.Insert(x13);
+            tree.Insert(x14);
+
+            Console.WriteLine(tree.GetRoot().Right.Right.Left.Data[0].X + ", "+ tree.GetRoot().Right.Right.Left.Data[0].Y);
+            tree.Remove(x4);
+            var l = tree.Find(x1);
+            l = tree.Find(x2);
+            l = tree.Find(x3);
+            l = tree.Find(x5);
+            l = tree.Find(x6);
+            l = tree.Find(x7);
+            l = tree.Find(x8);
+            l = tree.Find(x9);
+            l = tree.Find(x10);
+            l = tree.Find(x11);
+            l = tree.Find(x12);
+            l = tree.Find(x13);
+            l = tree.Find(x14);
+
+            foreach (var item in tree.LevelOrderTraversal())
+            {
+                Console.WriteLine(item.X + ", " + item.Y);
+            }
+            tree.Remove(x1);
+            foreach (var item in tree.LevelOrderTraversal())
+            {
+                Console.WriteLine(item.X + ", " + item.Y);
+            }
+            Console.WriteLine("-----------------");
+            tree.Remove(x3);
+            foreach (var item in tree.LevelOrderTraversal())
+            {
+                Console.WriteLine(item.X + ", " + item.Y);
+            }
         }
     }
 }
