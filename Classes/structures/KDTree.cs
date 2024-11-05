@@ -44,6 +44,7 @@ namespace Classes.structures
                     {
                         //check all keys
                         bool isSame = true;
+                        #region Check all keys
                         for (int i = 0; i < dimensions; i++)
                         {
                             if (compareFunc(current.Data[0], point, i) != 0)
@@ -52,18 +53,21 @@ namespace Classes.structures
                                 break;
                             }
                         }
-                        if (isSame)
+                        #endregion
+                        if (isSame) // all keys are the same, insert into list 
                         {
                             current.Data.Add(point);
                             Count++;
                             return;
                         }
                     }
+                    //continue with left son
                     current = current.Left;
                     isLeftChild = true;
                 }
                 else
                 {
+                    //continue with right son
                     current = current.Right;
                     isLeftChild = false;
                 }
@@ -71,6 +75,7 @@ namespace Classes.structures
                 level++;
             }
 
+            //insert new node
             KDTreeNode<T> newNode = new KDTreeNode<T>(point);
             newNode.Parent = parent;
 
@@ -218,7 +223,6 @@ namespace Classes.structures
                         var data = subNode.Data;
                         subNode.Data = current.Data;
                         current.Data = data;
-
                         current = subNode;
 
                         //Remove points with same key at wanted dimension
@@ -230,17 +234,13 @@ namespace Classes.structures
                                 foreach (var d in item.Item1.Data)
                                 {
                                     reinsertNodes.Add(d);
-                                }
-                            }
-
-                        }
+                                } }}
                     }
                     else
                     {
                         throw new ApplicationException("No replacement node found.");
                     }
                 }
-
                 //final remove
                 if (subNode.Parent.Left != null && subNode == subNode.Parent.Left)
                 {
@@ -249,9 +249,7 @@ namespace Classes.structures
                 else
                 {
                     subNode.Parent.Right = null;
-                }
-            }
-
+                }}
             //reinsert points
             if (reinsertNodes != null && reinsertNodes.Count() > 0)
             {
@@ -262,6 +260,13 @@ namespace Classes.structures
             }
             
         }
+        /// <summary>
+        /// Returns one predecessor based on dimension currentDImension is now dimension of the predecessor
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="dimension"></param>
+        /// <param name="currentDimension">in-out parameter</param>
+        /// <param name="predecessors"></param>
         public void FindPredecessorByDimension(KDTreeNode<T> root, int dimension, ref int currentDimension, out List<(KDTreeNode<T>,int)> predecessors)
         {
             KDTreeNode<T> current = root;
@@ -317,7 +322,13 @@ namespace Classes.structures
 
         }
 
-
+        /// <summary>
+        /// returns list of successors along their dimension
+        /// </summary>
+        /// <param name="root"></param>
+        /// <param name="dimension"></param>
+        /// <param name="currentDimension">in-out parameter, dimension of the first successor</param>
+        /// <param name="successors"></param>
         public void FindSuccessorsByDimension(KDTreeNode<T> root, int dimension, ref int currentDimension, out List<(KDTreeNode<T>,int)> successors)
         {
             KDTreeNode<T> current = root;
@@ -454,15 +465,12 @@ namespace Classes.structures
                         break;
                     }
                 }
-
                 if (isInRange)
                 {
                     dataList.AddRange(current.Data);
                 }
-
                 //decide which son to visit next
                 level = level % dimensions;
-
 
                 int compareResultLower = compareFunc(lowerBound, current.Data[0], level); //-1 :lowerBound < current
                 int compareResultHigher = compareFunc(higherBound, current.Data[0], level); //-1 : higherBound < current

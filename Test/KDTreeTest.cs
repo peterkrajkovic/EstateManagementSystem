@@ -167,8 +167,176 @@ namespace Test
             Assert.AreEqual(0, failed);
         }
 
+        #region Structs for 2D random operation test
+        private static Func<Class2D, Class2D, int, int> compareFunc2D = (Class2D first, Class2D second, int level) =>
+        {
+            switch (level)
+            {
+                case 0:
+                    {
+                        int cmp = first.Primary.CompareTo(second.Primary);
+                        if (cmp == 0)
+                        {
+                            return first.X.CompareTo(second.X);
+                        }
+                        else
+                        {
+                            return cmp;
+                        }
+                    }
+                case 1:
+                    {
+                        int cmp = first.Primary.CompareTo(second.Primary);
+                        if (cmp == 0)
+                        {
+                            return first.Y.CompareTo(second.Y);
+                        }
+                        else
+                        {
+                            return cmp;
+                        }
+                    }
+                default:
+                    return 0;
 
-      
+            }
+        };
+
+        public class Class2D
+        {
+            public string Primary {  get; set; }
+            public int X { get; set; }
+            public int Y { get; set; }
+
+            public override string ToString()
+            {
+                return $"2D Class Primary: {Primary}, X: {X}, Y: {Y}";
+            }
+        }
+        public string RandomString()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPRSTUVWYZ";
+            Random random = new Random();
+            string s = "";
+            for (int i = 0; i < 10; i++) {
+                s += chars[random.Next(chars.Length)];
+            }
+            return s;
+
+        }
+
+        #endregion
+        [DataTestMethod]
+        [DataRow(1000)]
+        public void RandomOperationTest2D(int operations)
+        {
+            KDTree<Class2D> tree = new KDTree<Class2D>(2, compareFunc2D);
+            Console.WriteLine($"Starting RandomOperationTest with {operations} operations.");
+            int failed = 0;
+
+            List<Class2D> added = new();
+            Random rnd = new Random();
+            long currentId = 0;
+
+            for (int i = 0; i < 20000; i++)
+            {
+                Class2D newItem = new Class2D() { Primary = RandomString(), X = rnd.Next(0, 50), Y = rnd.Next(0, 50) };
+                currentId++;
+                Console.WriteLine($"Operation {i + 1}. Inserting " + newItem.ToString());
+                long currentCount = tree.Count;
+                tree.Insert(newItem);
+                added.Add(newItem);
+            }
+
+            for (int i = 0; i < operations; i++)
+            {
+                if (rnd.Next(1, 3) < 2 && added.Count() > 0)
+                {
+                    //remove
+                    int position = rnd.Next(0, added.Count());
+                    Console.WriteLine($"Operation {i + 1}. Removing " + added[position].ToString());
+                    long currentCount = tree.Count;
+                    tree.Remove(added[position]);
+                    if (tree.Count == currentCount - 1)
+                    {
+                        Console.WriteLine("1 item removed");
+                    }
+                    else if (tree.Count >= currentCount)
+                    {
+                        Console.Error.WriteLine($"Operation {i + 1}. 1 item was not removed. Previous count: " + currentCount + ", current count: " + tree.Count);
+                        failed++;
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine($"Operation {i + 1}. Too many items were removed. Previous count: " + currentCount + ", current count: " + tree.Count);
+                        failed++;
+                    }
+
+                    //after remove check if item was removed and other items were not
+                    foreach (var item in added)
+                    {
+                        var list = tree.Find(item);
+                        bool notFoundInList = true;
+                        if (list != null)
+                        {
+                            foreach (var it in list)
+                            {
+                                if (it.Equals(item))
+                                {
+                                    notFoundInList = false;
+                                }
+                            }
+                        }
+
+                        if ((list == null || notFoundInList) && !item.Equals(added[position]))
+                        {
+                            Console.Error.WriteLine($"Operation {i + 1}. Added item {item.ToString()} was removed without permission");
+                            var l = tree.Find(item);
+                            failed++;
+                        }
+                        else if ((list != null) && item.Equals(added[position]))
+                        {
+                            Console.Error.WriteLine($"Operation {i + 1}. Item was not removed properly");
+                            failed++;
+                        }
+                    }
+                    added.RemoveAt(position);
+                }
+                else
+                {
+                    //insert
+
+                    Class2D newItem = new Class2D() { Primary = RandomString(), X = rnd.Next(0,50), Y = rnd.Next(0,50) };
+                    currentId++;
+                    Console.WriteLine($"Operation {i + 1}. Inserting " + newItem.ToString());
+                    long currentCount = tree.Count;
+                    tree.Insert(newItem);
+                    added.Add(newItem);
+
+                    //after insert check if item was inserted
+                    if (tree.Count == currentCount + 1)
+                    {
+                        Console.WriteLine("1 item added");
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine($"Operation {i + 1}. 1 item was not added");
+                        failed++;
+                    }
+                    var list = tree.Find(newItem);
+                    if (list == null || list.Count() == 0)
+                    {
+                        Console.Error.WriteLine($"Operation {i + 1}. Added item was not found");
+                        failed++;
+                    }
+
+                }
+            }
+            Assert.AreEqual(0, failed);
+        }
+
+
+
 
         [DataTestMethod]
         [DataRow(50)]

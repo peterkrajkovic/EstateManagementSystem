@@ -395,8 +395,8 @@ namespace Backend
         /// </summary>
         /// <param name="parcelCount"></param>
         /// <param name="propertyCount"></param>
-        /// <param name="coverage"> which n-item in order uses previously used GPS</param>
-        public void LoadRandomTrees(int parcelCount, int propertyCount, int coverage)
+        /// <param name="coverage"> how many estates should overlap 0-100</param>
+        public void LoadRandomTrees(int parcelCount, int propertyCount, double coverage)
         {
             DeleteTrees();
 
@@ -433,7 +433,7 @@ namespace Backend
             }
         }
 
-        public Parcel CreateParcel(long currentId, GPS[] gps, List<Estate>? usedProperties, List<Estate>? usedParcels, int coverage)
+        public Parcel CreateParcel(long currentId, GPS[] gps, List<Estate>? usedProperties, List<Estate>? usedParcels, double coverage)
         {
             if (coverage > 0)
             {
@@ -461,7 +461,7 @@ namespace Backend
             return p;
         }
 
-        private Property CreateProperty(long currentId, GPS[] gps, List<Estate> usedProperties, List<Estate> usedParcels, int coverage)
+        private Property CreateProperty(long currentId, GPS[] gps, List<Estate> usedProperties, List<Estate> usedParcels, double coverage)
         {
             if (coverage > 0)
             {
@@ -490,12 +490,12 @@ namespace Backend
         }
 
 
-        private void UpdateGPS(GPS[] gps, List<Estate>? usedEstatesOthers, int coverage)
+        private void UpdateGPS(GPS[] gps, List<Estate>? usedEstatesOthers, double coverage)
         {
             Random random = new Random();
-            double doubleCOverage = (double)coverage / 100;
+            double doubleCoverage = coverage / 100;
 
-            if (usedEstatesOthers != null && random.NextDouble() < doubleCOverage && usedEstatesOthers.Count > 0)
+            if (usedEstatesOthers != null && random.NextDouble() < doubleCoverage && usedEstatesOthers.Count > 0)
             {
                 int pos = random.Next(0, usedEstatesOthers.Count);
                 gps[0] = new GPS(usedEstatesOthers[pos].LeftBottom);

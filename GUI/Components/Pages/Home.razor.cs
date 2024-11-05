@@ -28,7 +28,7 @@ namespace GUI.Components.Pages
             if (result != null && !result.Canceled && result.Data != null && result.Data is LoadRandomTreesDialog.LoadRandomTreesDialogData)
             {
                 var dialogData = (LoadRandomTreesDialog.LoadRandomTreesDialogData)result.Data;
-                ClientClass.LoadRandomTrees((int)dialogData.ParcelCount, (int)dialogData.PropertyCount, (int)dialogData.Coverage);
+                ClientClass.LoadRandomTrees((int)dialogData.ParcelCount, (int)dialogData.PropertyCount, (double)dialogData.Coverage);
                 findResults = null;
                 VisualizeAll();
             }

@@ -1,6 +1,6 @@
 ﻿@using GUI.Components.Client
 @using static GUI.Components.Client.Model
-@inject ClientClass ClientClass
+@inject Controller ClientClass
 
 <MudTable Items="@List" FixedHeader="true" Dense="true" Filter="new Func<Estate,bool>(FilterFunc)">
     <ToolBarContent>
@@ -77,7 +77,7 @@
         {
             return true;
         }
-        return estate.Description.Contains(searchString);
+        return estate.Description.ToLower().Contains(searchString.ToLower());
     }
 
     private async void Remove(Estate estate)

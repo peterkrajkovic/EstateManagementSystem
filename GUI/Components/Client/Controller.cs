@@ -5,7 +5,7 @@ using Classes.structures;
 namespace GUI.Components.Client
 
 {
-    public class ClientClass
+    public class Controller
     {
 
         public Core Core { get; set; } = new Core();
@@ -15,7 +15,7 @@ namespace GUI.Components.Client
         {
             return Core.InsertParcel(description, number, leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
         }
-        public void LoadRandomTrees(int parcels, int properties, int coverage)
+        public void LoadRandomTrees(int parcels, int properties, double coverage)
         {
             Core.LoadRandomTrees(parcels,properties,coverage);
         }

@@ -27,10 +27,10 @@ namespace Backend
             if (widthChar2 == 'W') width2 = -1;
             if (heightChar2 == 'S') height2 = -1;
 
-            width1 = random.NextDouble() * 90;
-            height1 = random.NextDouble() * 180;
-            width2 = width1 + random.NextDouble() * 90;
-            height2 = height1 + random.NextDouble() * 180;
+            width1 = random.NextDouble() * 10000;
+            height1 = random.NextDouble() * 10000;
+            width2 = width1 + 1 +random.NextDouble() * 99;
+            height2 = height1 + 1 + random.NextDouble() * 99;
 
             if (height2 > 0) heightChar2 = 'N';
             if (width2 > 0) widthChar2 = 'E';

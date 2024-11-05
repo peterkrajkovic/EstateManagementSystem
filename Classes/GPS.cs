@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Classes
 {
-    public class GPS : IComparable
+    public class GPS
     {
         public char WidthChar { get; set; }
         public char HeightChar { get; set; }
@@ -33,13 +33,5 @@ namespace Classes
             HeightChar = height >= 0 ? 'N' : 'S';
         }
 
-        public int CompareTo(object? obj)
-        {
-            if (obj is GPS && ((GPS)obj).Width == this.Width && ((GPS)obj).Height == this.Height)
-            {
-                return 0;
-            }
-            return -1;
-        }
     }
 }
