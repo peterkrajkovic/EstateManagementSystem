@@ -50,18 +50,22 @@
     </MudRadioGroup>
     if (PaperView == 0)
     {
+        @if (IsVizualize){
         <TreeView Name="All Estates" @key="Model.VisualizationNodeAll" VisualizationNode="Model.VisualizationNodeAll" />
          <TreeView Name="Parcels" @key="Model.VisualizationNodeParcels" VisualizationNode="Model.VisualizationNodeParcels" />
         <TreeView Name="Properties" @key="Model.VisualizationNodeProperties" VisualizationNode="Model.VisualizationNodeProperties" />
+        }
     } else
     {
         <ResultView OnEstatesDeleted="VisualizeAll" OnEstatesChanged="EstateChanged" @key="findResults" List="findResults" />
     }
 } else
 {
+    @if(IsVizualize){
     <TreeView Name="All Estates" @key="Model.VisualizationNodeAll" VisualizationNode="Model.VisualizationNodeAll"/>
     <TreeView Name="Parcels" @key="Model.VisualizationNodeParcels" VisualizationNode="Model.VisualizationNodeParcels" />
     <TreeView Name="Properties" @key="Model.VisualizationNodeProperties" VisualizationNode="Model.VisualizationNodeProperties" />
+    }
 }
 </MudPaper>
 

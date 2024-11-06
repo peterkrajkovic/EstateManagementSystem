@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/GUI/Components/Individual/FindDialog.razor
+/GUI/Components/Pages/Home.razor
+/GUI/Components/Pages/Home.razor.cs
+/Backend/Core.cs
+/Backend/FileHandler.cs

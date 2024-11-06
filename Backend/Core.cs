@@ -11,12 +11,20 @@ namespace Backend
                 switch (level)
                 {
                     case 0:
-                        return first.LeftBottom.Width.CompareTo(second.LeftBottom.Width);
+                        return first.LeftBottom.WidthChar.CompareTo(second.LeftBottom.WidthChar);
                     case 1:
-                        return first.LeftBottom.Height.CompareTo(second.LeftBottom.Height);
+                        return first.LeftBottom.Width.CompareTo(second.LeftBottom.Width);
                     case 2:
-                        return first.RightTop.Width.CompareTo(second.RightTop.Width);
+                        return first.LeftBottom.HeightChar.CompareTo(second.LeftBottom.HeightChar);
                     case 3:
+                        return first.LeftBottom.Height.CompareTo(second.LeftBottom.Height);
+                    case 4:
+                        return first.RightTop.WidthChar.CompareTo(second.RightTop.WidthChar);
+                    case 5:
+                        return first.RightTop.Width.CompareTo(second.RightTop.Width);
+                    case 6:
+                        return first.RightTop.HeightChar.CompareTo(second.RightTop.HeightChar);
+                    case 7:
                         return first.RightTop.Height.CompareTo(second.RightTop.Height);
                     default:
                         return 0;
@@ -24,9 +32,9 @@ namespace Backend
                 }
             };
 
-        private KDTree<Estate> AllTree { get; set; } = new KDTree<Estate>(4, compareFunc);
-        private KDTree<Estate> ParcelTree { get; set; } = new KDTree<Estate>(4, compareFunc);
-        private KDTree<Estate> PropertyTree { get; set; } = new KDTree<Estate>(4, compareFunc);
+        private KDTree<Estate> AllTree { get; set; } = new KDTree<Estate>(8, compareFunc);
+        private KDTree<Estate> ParcelTree { get; set; } = new KDTree<Estate>(8, compareFunc);
+        private KDTree<Estate> PropertyTree { get; set; } = new KDTree<Estate>(8, compareFunc);
         private long currentId = 0;
 
 
@@ -115,9 +123,9 @@ namespace Backend
         }
         public void DeleteTrees()
         {
-            AllTree = new KDTree<Estate>(4, compareFunc);
-            ParcelTree = new KDTree<Estate>(4, compareFunc);
-            PropertyTree = new KDTree<Estate>(4, compareFunc);
+            AllTree = new KDTree<Estate>(8, compareFunc);
+            ParcelTree = new KDTree<Estate>(8, compareFunc);
+            PropertyTree = new KDTree<Estate>(8, compareFunc);
             currentId = 0;
         }
         #endregion
@@ -199,12 +207,17 @@ namespace Backend
         #endregion
 
         #region RangeFind
-        public List<Estate>? RangeFindParcels(double leftBottomHeight, double leftBottomWidth, double rightTopHeight, double rightTopWidth)
+        public List<Estate>? RangeFindParcels(double leftBottomWidth, double leftBottomHeight, double rightTopHeight, double rightTopWidth)
         {
             List<Estate> estates = new();
+            char leftWidthChar = leftBottomWidth >= 0 ? 'E' : 'W';
+            char leftHeightChar = leftBottomHeight >= 0 ? 'N' : 'S';
+            char rightWidthChar = rightTopWidth >= 0 ? 'E' : 'W';
+            char rightHeightChar = rightTopHeight >= 0 ? 'N' : 'S';
 
-            Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(leftBottomWidth, leftBottomHeight), 0, "");
-            Estate higherParcel = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
+            Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue, 'E', 'N'), new GPS(leftBottomWidth, leftBottomHeight, 'E','N'), 0, "");
+            Estate higherParcel = new Parcel(0, new GPS(rightTopWidth, rightTopHeight, 'W','S'), new GPS(double.MaxValue, double.MaxValue, 'W', 'S'), 0, "");
+
             var newEstates = ParcelTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
@@ -215,14 +228,19 @@ namespace Backend
             }
 
 
-            return estates.ToList();
+            return estates.Distinct().ToList();
         }
         public List<Estate>? RangeFindProperties(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
             List<Estate> estates = new();
+            char leftWidthChar = leftBottomWidth >= 0 ? 'E' : 'W';
+            char leftHeightChar = leftBottomHeight >= 0 ? 'N' : 'S';
+            char rightWidthChar = rightTopWidth >= 0 ? 'E' : 'W';
+            char rightHeightChar = rightTopHeight >= 0 ? 'N' : 'S';
 
-            Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(leftBottomWidth, leftBottomHeight), 0, "");
-            Estate higherParcel = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
+            Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue, 'E', 'N'), new GPS(leftBottomWidth, leftBottomHeight, 'E','N'), 0, "");
+            Estate higherParcel = new Parcel(0, new GPS(rightTopWidth, rightTopHeight, 'W', 'S'), new GPS(double.MaxValue, double.MaxValue, 'W', 'S'), 0, "");
+
             var newEstates = PropertyTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
@@ -237,10 +255,13 @@ namespace Backend
         public List<Estate>? RangeFindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
             List<Estate> estates = new();
+            char leftWidthChar = leftBottomWidth >= 0 ? 'E' : 'W';
+            char leftHeightChar = leftBottomHeight >= 0 ? 'N' : 'S';
+            char rightWidthChar = rightTopWidth >= 0 ? 'E' : 'W';
+            char rightHeightChar = rightTopHeight >= 0 ? 'N' : 'S';
 
-            //1.st scenario - estates cross border on right top side of existing estate
-            Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(leftBottomWidth, leftBottomHeight), 0, "");
-            Estate higherParcel = new Parcel(0, new GPS(rightTopWidth, rightTopHeight), new GPS(double.MaxValue, double.MaxValue), 0, "");
+            Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue, 'E', 'N'), new GPS(leftBottomWidth, leftBottomHeight, 'E', 'N'), 0, "");
+            Estate higherParcel = new Parcel(0, new GPS(rightTopWidth, rightTopHeight, 'W','S'), new GPS(double.MaxValue, double.MaxValue, 'W', 'S'), 0, "");
             var newEstates = AllTree.RangeFind(lowerParcel, higherParcel);
             if (newEstates != null && newEstates.Count() > 0)
             {
@@ -254,8 +275,11 @@ namespace Backend
         }
         public List<Estate>? RangeFindParcels(double width, double height)
         {
-            Estate lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue), new GPS(width, height), 0, "");
-            Estate higherParcel = new Parcel(0, new GPS(width, height), new GPS(double.MaxValue, double.MaxValue), 0, "");
+            char widthChar = width >= 0 ? 'E' : 'W';
+            char heightChar = height >= 0 ? 'N' : 'S';
+            Parcel lowerParcel = new Parcel(0, new GPS(double.MinValue, double.MinValue, 'E', 'N'), new GPS(width, height, 'E','N'), 0, "");
+            Parcel higherParcel = new Parcel(0, new GPS(width, height, 'W','S'), new GPS(double.MaxValue, double.MaxValue, 'W', 'S'), 0, "");
+
 
             var estates = new List<Estate>();
             var newEstates = ParcelTree.RangeFind(lowerParcel, higherParcel);
@@ -270,8 +294,10 @@ namespace Backend
         }
         public List<Estate>? RangeFindProperties(double width, double height)
         {
-            Property lowerProperty = new Property(0, new GPS(double.MinValue, double.MinValue), new GPS(width, height), 0, "");
-            Property higherProperty = new Property(0, new GPS(width, height), new GPS(double.MaxValue, double.MaxValue), 0, "");
+            char widthChar = width >= 0 ? 'E' : 'W';
+            char heightChar = height >= 0 ? 'N' : 'S';
+            Property lowerProperty = new Property(0, new GPS(double.MinValue, double.MinValue,'E', 'N'), new GPS(width, height,'E','N'), 0, "");
+            Property higherProperty = new Property(0, new GPS(width, height, 'W','S'), new GPS(double.MaxValue, double.MaxValue,'W','S'), 0, "");
 
             var estates = new List<Estate>();
             var newEstates = PropertyTree.RangeFind(lowerProperty, higherProperty);
@@ -286,8 +312,10 @@ namespace Backend
         }
         public List<Estate>? RangeFindAll(double width, double height)
         {
-            Estate lowerProperty = new Property(0, new GPS(double.MinValue, double.MinValue), new GPS(width, height), 0, "");
-            Estate higherProperty = new Property(0, new GPS(width, height), new GPS(double.MaxValue, double.MaxValue), 0, "");
+            char widthChar = width >= 0 ? 'E' : 'W';
+            char heightChar = height >= 0 ? 'N' : 'S';
+            Property lowerProperty = new Property(0, new GPS(double.MinValue, double.MinValue, 'E', 'N'), new GPS(width, height, 'E','N'), 0, "");
+            Property higherProperty = new Property(0, new GPS(width, height, 'W','S'), new GPS(double.MaxValue, double.MaxValue, 'W', 'S'), 0, "");
 
             var estates = new List<Estate>();
             var newEstates = AllTree.RangeFind(lowerProperty, higherProperty);

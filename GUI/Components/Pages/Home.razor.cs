@@ -16,6 +16,7 @@ namespace GUI.Components.Pages
     public partial class Home
     {
         public static readonly string FILENAME = "estates.csv";
+        public static bool IsVizualize = true;
         private List<Estate>? findResults { get; set; }
         private int PaperView { get; set; } = 0;
 
@@ -31,14 +32,19 @@ namespace GUI.Components.Pages
                 ClientClass.LoadRandomTrees((int)dialogData.ParcelCount, (int)dialogData.PropertyCount, (double)dialogData.Coverage);
                 findResults = null;
                 VisualizeAll();
+                Snackbar.Add("Estates loaded", Severity.Success);
             }
+            
         }
         private void VisualizeAll()
         {
+            if (IsVizualize)
+            {
             Model.VisualizationNodeAll = ClientClass.VisualizeAll();
             Model.VisualizationNodeParcels = ClientClass.VisualizeParcels();
             Model.VisualizationNodeProperties = ClientClass.VisualizeProperties();
             StateHasChanged();
+            }
         }
         private void EstateChanged()
         {
@@ -62,6 +68,7 @@ namespace GUI.Components.Pages
                 string content = await reader.ReadToEndAsync();
                 if (content.Length > 0)
                 {
+                    Snackbar.Add("Parsing file.",Severity.Normal);
                     if (ClientClass.LoadFile(content))
                     {
                         Snackbar.Add("File loaded correctly.", Severity.Success);
@@ -97,6 +104,7 @@ namespace GUI.Components.Pages
         private void DeleteTrees()
         {
             ClientClass.DeleteTrees();
+            Snackbar.Add("Trees deleted", Severity.Success);
             findResults = null;
             VisualizeAll();
         }
@@ -125,6 +133,24 @@ namespace GUI.Components.Pages
             if (result != null && !result.Canceled && result.Data != null && result.Data is FindDialog.FindModel)
             {
                 FindDialog.FindModel model = (FindDialog.FindModel)result.Data;
+                #region Change directions by chars
+                if (model.X1Char != null && model.X1Char == 'W')
+                {
+                    model.X1 = model.X1 * -1;
+                }
+                if (model.X2Char != null && model.X2Char == 'W')
+                {
+                    model.X2 = model.X2 * -1;
+                }
+                if (model.Y1Char != null && model.Y1Char == 'S')
+                {
+                    model.Y1 = model.Y1 * -1;
+                }
+                if (model.Y2Char != null && model.Y2Char == 'S')
+                {
+                    model.Y2 = model.Y2 * -1;
+                }
+                #endregion
                 switch (model.EstateType)
                 {
                     case 0:

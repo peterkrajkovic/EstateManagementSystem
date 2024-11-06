@@ -21,12 +21,12 @@ namespace Backend
             try
             {
                 // Parse GPS for LeftBottom
-                double leftBottomWidth = double.TryParse(columns[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double lbWidth) ? lbWidth : 0;
-                double leftBottomHeight = double.TryParse(columns[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double lbHeight) ? lbHeight : 0;
+                double leftBottomWidth = double.TryParse(columns[0], out double lbWidth) ? lbWidth : 0;
+                double leftBottomHeight = double.TryParse(columns[1], out double lbHeight) ? lbHeight : 0;
 
                 // Parse GPS for RightTop
-                double rightTopWidth = double.TryParse(columns[2], NumberStyles.Any, CultureInfo.InvariantCulture, out double rtWidth) ? rtWidth : 0;
-                double rightTopHeight = double.TryParse(columns[3], NumberStyles.Any, CultureInfo.InvariantCulture, out double rtHeight) ? rtHeight : 0;
+                double rightTopWidth = double.TryParse(columns[2], out double rtWidth) ? rtWidth : 0;
+                double rightTopHeight = double.TryParse(columns[3], out double rtHeight) ? rtHeight : 0;
 
                 // Parse Number and Description
                 int number = int.TryParse(columns[4], out int parsedNumber) ? parsedNumber : 0;

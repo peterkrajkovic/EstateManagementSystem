@@ -24,8 +24,20 @@
                 <MudItem>
                     <MudTextField Label=" width" T="double?" @bind-Value="Model.X1">
                 </MudTextField>
-                <MudTextField T="double?" Label="height" @bind-Value="Model.Y1">
-                </MudTextField>
+                    <MudSelect T="char" @bind-Value="Model.X1Char">
+                        <MudSelectItem Value="'W'">
+                        </MudSelectItem>
+                        <MudSelectItem Value="'E'">
+                        </MudSelectItem>
+                    </MudSelect>
+                    <MudTextField T="double?" Label="height" @bind-Value="Model.Y1">
+                    </MudTextField>
+                    <MudSelect T="char" @bind-Value="Model.Y1Char">
+                        <MudSelectItem Value="'S'">
+                        </MudSelectItem>
+                        <MudSelectItem Value="'N'">
+                        </MudSelectItem>
+                    </MudSelect>
                 </MudItem>
             } else
             {
@@ -33,15 +45,39 @@
                     <MudText>Left Bottom Point</MudText>
                     <MudTextField Label=" width" T="double?" @bind-Value="Model.X1">
                     </MudTextField>
+                    <MudSelect T="char" @bind-Value="Model.X1Char">
+                        <MudSelectItem Value="'W'">
+                        </MudSelectItem>
+                        <MudSelectItem Value="'E'">
+                        </MudSelectItem>
+                    </MudSelect>
                     <MudTextField T="double?" Label="height" @bind-Value="Model.Y1">
                     </MudTextField>
+                    <MudSelect T="char" @bind-Value="Model.Y1Char">
+                        <MudSelectItem Value="'S'">
+                        </MudSelectItem>
+                        <MudSelectItem Value="'N'">
+                        </MudSelectItem>
+                    </MudSelect>
                 </MudItem>
                 <MudItem xs="6">
                     <MudText>Right Top Point</MudText>
                     <MudTextField Label=" width" T="double?" @bind-Value="Model.X2">
                     </MudTextField>
+                    <MudSelect T="char" @bind-Value="Model.X2Char">
+                        <MudSelectItem Value="'W'">
+                        </MudSelectItem>
+                          <MudSelectItem Value="'E'">
+                        </MudSelectItem>
+                    </MudSelect>
                     <MudTextField T="double?" Label="height" @bind-Value="Model.Y2">
                     </MudTextField>
+                    <MudSelect T="char" @bind-Value="Model.Y2Char">
+                        <MudSelectItem Value="'S'">
+                        </MudSelectItem>
+                        <MudSelectItem Value="'N'">
+                        </MudSelectItem>
+                    </MudSelect>
                 </MudItem>
             }
         </MudGrid>
@@ -59,7 +95,8 @@
 
     private void Submit()
     {
-        if ((Model.GPS == 0 && Model.X1 != null && Model.Y1 != null) || (Model.GPS == 1 && Model.X1 != null && Model.Y2 != null && Model.X2 != null && Model.Y2 != null))
+        if ((Model.GPS == 0 && Model.X1 != null && Model.Y1 != null && Model.X1Char != null && Model.Y1 != null) 
+           || (Model.GPS == 1 && Model.X1 != null && Model.Y2 != null && Model.X2 != null && Model.Y1 != null && Model.X1Char != null && Model.X2Char != null && Model.Y1Char != null && Model.Y2Char != null))
             MudDialog.Close(DialogResult.Ok(Model));
         else
             Snackbar.Add("All fields must be assigned.", Severity.Error);
@@ -73,9 +110,13 @@
     public class FindModel
     {
         public double? X1 { get; set; }
+        public char X1Char { get; set; } = 'E';
         public double? Y1 { get; set; }
+        public char Y1Char { get; set; } = 'N';
         public double? X2 { get; set; }
+        public char X2Char { get; set; } = 'E';
         public double? Y2 { get; set; }
+        public char Y2Char { get; set; } = 'N';
         public int GPS { get; set; }
         public int EstateType { get; set; } //0-Property, 1-Parcel, 2-All
     }

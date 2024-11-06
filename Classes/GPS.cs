@@ -33,5 +33,13 @@ namespace Classes
             HeightChar = height >= 0 ? 'N' : 'S';
         }
 
+        public GPS(double width, double height, char widthChar, char heightChar)
+        {
+            Width = width;
+            Height = height;
+            WidthChar = widthChar;
+            HeightChar = heightChar;
+        }
+
     }
 }
