@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Backend", "Backend\Backend.csproj", "{77B430F1-7C92-47B2-82EB-B4C6CBA23AAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StarterApp", "StarterApp\StarterApp.csproj", "{C7D2F972-8408-4DCA-8349-25CDC8A323C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StarterApp", "StarterApp\StarterApp.csproj", "{C7D2F972-8408-4DCA-8349-25CDC8A323C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

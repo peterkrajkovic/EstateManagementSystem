@@ -19,6 +19,7 @@ namespace GUI.Components.Pages
         public static bool IsVizualize = true;
         private List<Estate>? findResults { get; set; }
         private int PaperView { get; set; } = 0;
+        private FindDialog.FindModel? LastFindModel { get; set; }
 
         private async void LoadRandomTrees()
         {
@@ -29,7 +30,7 @@ namespace GUI.Components.Pages
             if (result != null && !result.Canceled && result.Data != null && result.Data is LoadRandomTreesDialog.LoadRandomTreesDialogData)
             {
                 var dialogData = (LoadRandomTreesDialog.LoadRandomTreesDialogData)result.Data;
-                ClientClass.LoadRandomTrees((int)dialogData.ParcelCount, (int)dialogData.PropertyCount, (double)dialogData.Coverage);
+                Controller.LoadRandomTrees((int)dialogData.ParcelCount, (int)dialogData.PropertyCount, (double)dialogData.Coverage);
                 findResults = null;
                 VisualizeAll();
                 Snackbar.Add("Estates loaded", Severity.Success);
@@ -40,16 +41,29 @@ namespace GUI.Components.Pages
         {
             if (IsVizualize)
             {
-            Model.VisualizationNodeAll = ClientClass.VisualizeAll();
-            Model.VisualizationNodeParcels = ClientClass.VisualizeParcels();
-            Model.VisualizationNodeProperties = ClientClass.VisualizeProperties();
+            Model.VisualizationNodeAll = Controller.VisualizeAll();
+            Model.VisualizationNodeParcels = Controller.VisualizeParcels();
+            Model.VisualizationNodeProperties = Controller.VisualizeProperties();
             StateHasChanged();
             }
         }
+
         private void EstateChanged()
         {
-            findResults = null;
+            if (LastFindModel != null)
+            {
+                FindByModel(LastFindModel);
+            }
             Snackbar.Add("Estate updated successfully.", Severity.Success);
+            VisualizeAll();
+        }
+        private void EstateDeleted()
+        {
+            if (LastFindModel != null)
+            {
+                FindByModel(LastFindModel);
+            }
+            Snackbar.Add("Estate deleted successfully.", Severity.Success);
             VisualizeAll();
         }
 
@@ -69,7 +83,7 @@ namespace GUI.Components.Pages
                 if (content.Length > 0)
                 {
                     Snackbar.Add("Parsing file.",Severity.Normal);
-                    if (ClientClass.LoadFile(content))
+                    if (Controller.LoadFile(content))
                     {
                         Snackbar.Add("File loaded correctly.", Severity.Success);
                         VisualizeAll();
@@ -92,7 +106,7 @@ namespace GUI.Components.Pages
 
         private async void SaveFiles()
         {
-            string fileText = ClientClass.SaveFile();
+            string fileText = Controller.SaveFile();
             byte[] byteArray = Encoding.UTF8.GetBytes(fileText);
 
             var fileStream = new MemoryStream(byteArray);
@@ -103,7 +117,8 @@ namespace GUI.Components.Pages
 
         private void DeleteTrees()
         {
-            ClientClass.DeleteTrees();
+            Controller.DeleteTrees();
+            LastFindModel = null;
             Snackbar.Add("Trees deleted", Severity.Success);
             findResults = null;
             VisualizeAll();
@@ -151,39 +166,12 @@ namespace GUI.Components.Pages
                     model.Y2 = model.Y2 * -1;
                 }
                 #endregion
-                switch (model.EstateType)
-                {
-                    case 0:
-                        if (model.GPS == 0)
-                        {
-                            findResults = ClientClass.FindProperties((double)model.X1, (double)model.Y1);
-                        }
-                        else
-                        {
-                            findResults = ClientClass.RangeFindProperties((double)model.X1, (double)model.Y1, (double)model.X2, (double)model.Y2);
-                        }
-                        break;
-                    case 1:
-                        if ((double)model.GPS == 0)
-                        {
-                            findResults = ClientClass.RangeFindParcels((double)model.X1, (double)model.Y1);
-                        }
-                        else
-                        {
-                            findResults = ClientClass.RangeFindParcels((double)model.X1, (double)model.Y1, (double)model.X2, (double)model.Y2);
-                        }
-                        break;
-                    default:
-                        if (model.GPS == 0)
-                        {
-                            findResults = ClientClass.RangeFindAll((double)model.X1, (double)model.Y1);
-                        }
-                        else
-                        {
-                            findResults = ClientClass.RangeFindAll((double)model.X1, (double)model.Y1, (double)model.X2, (double)model.Y2);
-                        }
-                        break;
-                }
+
+                //save model for reloading after Estate update or delete
+                LastFindModel = model;
+
+                FindByModel(model); //backend call
+                
                 if (findResults == null)
                 {
                     Snackbar.Add("Tree has no estates. Add some first.", Severity.Normal);
@@ -195,6 +183,60 @@ namespace GUI.Components.Pages
                 else
                 {
                     PaperView = 1;
+                }
+            }
+        }
+        private async void FindByModel(FindDialog.FindModel model)
+        {
+            switch (model.EstateType)
+            {
+                case 0:
+                    if (model.GPS == 0)
+                    {
+                        findResults = Controller.FindProperties((double)model.X1, (double)model.Y1);
+                    }
+                    else
+                    {
+                        findResults = Controller.RangeFindProperties((double)model.X1, (double)model.Y1, (double)model.X2, (double)model.Y2);
+                    }
+                    break;
+                case 1:
+                    if ((double)model.GPS == 0)
+                    {
+                        findResults = Controller.RangeFindParcels((double)model.X1, (double)model.Y1);
+                    }
+                    else
+                    {
+                        findResults = Controller.RangeFindParcels((double)model.X1, (double)model.Y1, (double)model.X2, (double)model.Y2);
+                    }
+                    break;
+                default:
+                    if (model.GPS == 0)
+                    {
+                        findResults = Controller.RangeFindAll((double)model.X1, (double)model.Y1);
+                    }
+                    else
+                    {
+                        findResults = Controller.RangeFindAll((double)model.X1, (double)model.Y1, (double)model.X2, (double)model.Y2);
+                    }
+                    break;
+            }
+            if (model.Boundaries == 0) // filter points that share boundaries
+            {
+                if (model.GPS == 1) //2 point search
+                {
+                    findResults = findResults.Where(x => 
+                        (x.LeftBottom.Width.CompareTo((double)model.X2) == 0 && x.LeftBottom.Height.CompareTo((double)model.Y2) == 0) 
+                    ||  (x.LeftBottom.Width.CompareTo((double)model.X1) == 0 && x.LeftBottom.Height.CompareTo((double)model.Y1) == 0) 
+                    || (x.RightTop.Width.CompareTo((double)model.X2) == 0 && x.RightTop.Height.CompareTo((double)model.Y2) == 0)
+                    || (x.RightTop.Width.CompareTo((double)model.X1) == 0 && x.RightTop.Height.CompareTo((double)model.Y1) == 0)
+                    ).ToList();
+                } else //1 point search
+                {
+                    findResults = findResults.Where(x =>
+                 (x.LeftBottom.Width.CompareTo((double)model.X1) == 0 && x.LeftBottom.Height.CompareTo((double)model.Y1) == 0)
+                 || (x.RightTop.Width.CompareTo((double)model.X1) == 0 && x.RightTop.Height.CompareTo((double)model.Y1) == 0)
+                 ).ToList();
                 }
             }
         }
@@ -217,10 +259,10 @@ namespace GUI.Components.Pages
                 switch (model.EstateType)
                 {
                     case 0:
-                        ClientClass.InsertProperty(model.Description, model.Number, model.X1, model.Y1, model.X2, model.Y2);
+                        Controller.InsertProperty(model.Description, model.Number, model.X1, model.Y1, model.X2, model.Y2);
                         break;
                     default:
-                        ClientClass.InsertParcel(model.Description, model.Number, model.X1, model.Y1, model.X2, model.Y2);
+                        Controller.InsertParcel(model.Description, model.Number, model.X1, model.Y1, model.X2, model.Y2);
                         break;
                 }
             }

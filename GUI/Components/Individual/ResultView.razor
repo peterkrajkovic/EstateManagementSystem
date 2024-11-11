@@ -1,6 +1,6 @@
 ﻿@using GUI.Components.Client
 @using static GUI.Components.Client.Model
-@inject Controller ClientClass
+@inject Controller Controller
 
 <MudTable Items="@List" FixedHeader="true" Dense="true" Filter="new Func<Estate,bool>(FilterFunc)">
     <ToolBarContent>
@@ -39,14 +39,17 @@
         <MudTd DataLabel="References">
             @if(context.References!= null && context.References.Count() > 0)
             {
-                <MudExpansionPanels MultiExpansion="true">
+                @* <MudExpansionPanels MultiExpansion="true">
                     <MudExpansionPanel>
                         @foreach (var item in context.References)
                         {
                             <MudText>@item.Description : @item.Number</MudText>
                         }
                     </MudExpansionPanel>
-                </MudExpansionPanels>
+                </MudExpansionPanels> *@
+
+                <MudIconButton Icon="@Icons.Material.Filled.AddLink" aria-label="edit" OnClick="() => ShowReferences(context)"></MudIconButton>
+
             }
             </MudTd>
         <MudTd DataLabel="Edit"><MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="edit" OnClick="() => Edit(context)"></MudIconButton></MudTd>
@@ -83,11 +86,11 @@
     private async void Remove(Estate estate)
     {
         List.Remove(estate);
-        ClientClass.RemoveEstate(estate);
+        Controller.RemoveEstate(estate);
 
         if (OnEstatesDeleted.HasDelegate)
         {
-            await OnEstatesDeleted.InvokeAsync();
+            OnEstatesDeleted.InvokeAsync();
         }
         StateHasChanged();
     }
@@ -108,12 +111,23 @@
         if (result != null && !result.Canceled && result.Data != null && result.Data is EstateModel)
         {
             EstateModel model = (EstateModel)result.Data;
-            ClientClass.EditEstate(estate, model.Description, model.Number, model.X1, model.Y1, model.X2, model.Y2);
+            Controller.EditEstate(estate, model.Description, model.Number, model.X1, model.Y1, model.X2, model.Y2);
         }
 
         if (OnEstatesChanged.HasDelegate)
         {
             await OnEstatesChanged.InvokeAsync();
         }
+    }
+
+    private async void ShowReferences(Estate estate)
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true, FullWidth = true};
+        var parameters = new DialogParameters<ResultViewDialog>
+            {
+                { nameof(ResultViewDialog.List), estate.References }
+            };
+
+        DialogService.Show<ResultViewDialog>("Estate References", parameters, options);
     }
 }

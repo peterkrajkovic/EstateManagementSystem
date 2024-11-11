@@ -1,6 +1,7 @@
 ﻿using Classes;
 using Classes.structures;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 
 namespace Backend
 {
@@ -45,7 +46,7 @@ namespace Backend
             ParcelTree.Insert(p);
             AllTree.Insert(p);
             
-            p.References = RangeFindProperties(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+            p.References = RangeFindProperties(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight, false);
             if (p.References != null)
             {
                 for (int i = 0; i < p.References.Count(); i++)
@@ -62,7 +63,7 @@ namespace Backend
             currentId++;
             PropertyTree.Insert(p);
             AllTree.Insert(p);
-            p.References = RangeFindParcels(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight);
+            p.References = RangeFindParcels(leftBottomWidth, leftBottomHeight, rightTopWidth, rightTopHeight, false);
             if (p.References != null)
             {
                 for (int i = 0; i < p.References.Count(); i++)
@@ -78,46 +79,50 @@ namespace Backend
         {
             AllTree.Remove(p);
             ParcelTree.Remove(p);
-            var referenced = RangeFindProperties(p.LeftBottom.Width, p.LeftBottom.Height, p.RightTop.Width, p.RightTop.Height);
-            if (referenced == null)
+            if (p.References != null && p.References.Count > 0)
             {
-                return;
-            }
-            for (int i = 0;i < referenced.Count(); i++)
-            {
-                referenced[i].RemoveReference(p);
+                for (int i = 0; i < p.References.Count(); i++)
+                {
+                    p.References[i].RemoveReference(p);
+                }
             }
         }
         public void RemoveProperty(Property p)
         {
             AllTree.Remove(p);
             PropertyTree.Remove(p);
-            var referenced = RangeFindParcels(p.LeftBottom.Width, p.LeftBottom.Height, p.RightTop.Width, p.RightTop.Height);
-            if (referenced == null)
+            if (p.References != null && p.References.Count > 0)
             {
-                return;
-            }
-            for (int i = 0; i < referenced.Count(); i++)
-            {
-                referenced[i].RemoveReference(p);
+                for (int i = 0; i < p.References.Count(); i++)
+                {
+                    p.References[i].RemoveReference(p);
+                }
             }
         }
         public void RemoveEstate(Estate e)
         {
             if (e is Parcel)
             {
-                var foundParcel = ParcelTree.Find((Parcel)e);
-                if (foundParcel != null && foundParcel.Count() > 0)
+                var foundParcels = ParcelTree.Find((Parcel)e);
+                foreach (var p in foundParcels)
                 {
-                    RemoveParcel((Parcel)foundParcel[0]);
+                    if (p.Equals(e))
+                    {
+                        RemoveParcel((Parcel)p);
+                        break;
+                    }
                 }
             }
             else
             {
-                var foundProperty = PropertyTree.Find((Property)e);
-                if (foundProperty != null && foundProperty.Count() > 0)
+                var foundProperties = PropertyTree.Find((Property)e);
+                foreach (var p in foundProperties)
                 {
-                    RemoveProperty((Property)foundProperty[0]);
+                    if (p.Equals(e))
+                    {
+                        RemoveProperty((Property)p);
+                        break;
+                    }
                 }
             }
         }
@@ -207,7 +212,7 @@ namespace Backend
         #endregion
 
         #region RangeFind
-        public List<Estate>? RangeFindParcels(double leftBottomWidth, double leftBottomHeight, double rightTopHeight, double rightTopWidth)
+        public List<Estate>? RangeFindParcels(double leftBottomWidth, double leftBottomHeight, double rightTopHeight, double rightTopWidth, bool clone = true)
         {
             List<Estate> estates = new();
             char leftWidthChar = leftBottomWidth >= 0 ? 'E' : 'W';
@@ -223,14 +228,21 @@ namespace Backend
             {
                 foreach (var item in newEstates)
                 {
-                    estates.Add(item);
+                    if (clone)
+                    {
+                        estates.Add(item.Clone());
+                    } else
+                    {
+                        estates.Add(item);
+                    }
+                    
                 }
             }
 
 
             return estates.Distinct().ToList();
         }
-        public List<Estate>? RangeFindProperties(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        public List<Estate>? RangeFindProperties(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight, bool clone = true)
         {
             List<Estate> estates = new();
             char leftWidthChar = leftBottomWidth >= 0 ? 'E' : 'W';
@@ -246,13 +258,20 @@ namespace Backend
             {
                 foreach (var item in newEstates)
                 {
-                    estates.Add(item);
+                        if (clone)
+                        {
+                            estates.Add(item.Clone());
+                        }
+                        else
+                        {
+                            estates.Add(item);
+                        }
                 }
             }
 
             return estates.ToList();
         }
-        public List<Estate>? RangeFindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
+        public List<Estate>? RangeFindAll(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight, bool clone = true)
         {
             List<Estate> estates = new();
             char leftWidthChar = leftBottomWidth >= 0 ? 'E' : 'W';
@@ -267,13 +286,21 @@ namespace Backend
             {
                 foreach (var item in newEstates)
                 {
-                    estates.Add(item);
+                    if (clone)
+                    {
+                        estates.Add(item.Clone());
+                    }
+                    else
+                    {
+                        estates.Add(item);
+                    }
+
                 }
             }
 
             return estates.ToList();
         }
-        public List<Estate>? RangeFindParcels(double width, double height)
+        public List<Estate>? RangeFindParcels(double width, double height, bool clone = true)
         {
             char widthChar = width >= 0 ? 'E' : 'W';
             char heightChar = height >= 0 ? 'N' : 'S';
@@ -287,12 +314,20 @@ namespace Backend
             {
                 foreach (var item in newEstates)
                 {
-                    estates.Add(item.Clone());
+                    if (clone)
+                    {
+                        estates.Add(item.Clone());
+                    }
+                    else
+                    {
+                        estates.Add(item);
+                    }
+
                 }
             }
             return estates;
         }
-        public List<Estate>? RangeFindProperties(double width, double height)
+        public List<Estate>? RangeFindProperties(double width, double height, bool clone = true)
         {
             char widthChar = width >= 0 ? 'E' : 'W';
             char heightChar = height >= 0 ? 'N' : 'S';
@@ -305,12 +340,20 @@ namespace Backend
             {
                 foreach (var item in newEstates)
                 {
-                    estates.Add(item.Clone());
+                    if (clone)
+                    {
+                        estates.Add(item.Clone());
+                    }
+                    else
+                    {
+                        estates.Add(item);
+                    }
+
                 }
             }
             return estates;
         }
-        public List<Estate>? RangeFindAll(double width, double height)
+        public List<Estate>? RangeFindAll(double width, double height, bool clone = true)
         {
             char widthChar = width >= 0 ? 'E' : 'W';
             char heightChar = height >= 0 ? 'N' : 'S';
@@ -323,7 +366,15 @@ namespace Backend
             {
                 foreach (var item in newEstates)
                 {
-                    estates.Add(item.Clone());
+                    if (clone)
+                    {
+                        estates.Add(item.Clone());
+                    }
+                    else
+                    {
+                        estates.Add(item);
+                    }
+
                 }
             }
             return estates;
@@ -472,7 +523,7 @@ namespace Backend
             Parcel p = new Parcel(currentId, gps[0], gps[1], random.Next(1,999999), Generator.GenerateRandomName(random.Next(3, 7)));
             ParcelTree.Insert(p);
             AllTree.Insert(p);
-            p.References = RangeFindProperties(gps[0].Width, gps[0].Height, gps[1].Width, gps[1].Height);
+            p.References = RangeFindProperties(gps[0].Width, gps[0].Height, gps[1].Width, gps[1].Height, false);
             if (p.References != null)
             {
                 for (int i = 0; i < p.References.Count(); i++)
@@ -500,7 +551,7 @@ namespace Backend
             Property p = new Property(currentId, gps[0], gps[1], random.Next(1,99999), Generator.GenerateRandomName(random.Next(3, 7)));
             PropertyTree.Insert(p);
             AllTree.Insert(p);
-            p.References = RangeFindParcels(gps[0].Width, gps[0].Height, gps[1].Width, gps[1].Height);
+            p.References = RangeFindParcels(gps[0].Width, gps[0].Height, gps[1].Width, gps[1].Height, false);
             if (p.References != null)
             {
                 for (int i = 0; i < p.References.Count(); i++)

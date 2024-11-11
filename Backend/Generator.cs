@@ -14,7 +14,7 @@ namespace Backend
             char[] widthDirections = { 'W', 'E' };  // E = East, W = West
             char[] heightDirections = { 'N', 'S' }; // N = North, S = South
 
-            double width1, height1, width2, height2 = 1;
+            double width1 = 1, height1 = 1, width2, height2;
 
             char widthChar1 = widthDirections[random.Next(widthDirections.Length)];
             char heightChar1 = heightDirections[random.Next(heightDirections.Length)];
@@ -24,16 +24,34 @@ namespace Backend
             // Adjust width and height based on direction
             if (widthChar1 == 'W') width1 = -1;    // West makes width negative
             if (heightChar1 == 'S') height1 = -1; // South makes height negative
-            if (widthChar2 == 'W') width2 = -1;
-            if (heightChar2 == 'S') height2 = -1;
 
-            width1 = random.NextDouble() * 100000;
-            height1 = random.NextDouble() * 100000;
-            width2 = width1 + 1 +random.NextDouble() * 99;
+            width1 = width1 * random.NextDouble() * 1000;
+            height1 = height1 * random.NextDouble() * 1000;
+            width2 = width1 + 1 + random.NextDouble() * 99;
             height2 = height1 + 1 + random.NextDouble() * 99;
 
-            if (height2 > 0) heightChar2 = 'N';
-            if (width2 > 0) widthChar2 = 'E';
+            #region Adjusting and Rounding values
+            width1 = Math.Round(width1, 3);
+            width2 = Math.Round(width2, 3);
+            height1 = Math.Round(height1, 3);
+            height2 = Math.Round(height2, 3);
+            if (height2 > 0)
+            {
+                heightChar2 = 'N';
+            }
+            else
+            {
+                heightChar2 = 'S';
+            }
+            if (width2 > 0)
+            {
+                widthChar2 = 'E';
+            }
+            else
+            {
+                widthChar2 = 'W';
+            }
+            #endregion
 
             return new GPS[]
             {
@@ -53,6 +71,6 @@ namespace Backend
             return new string(randomName);
         }
 
-       
+
     }
 }

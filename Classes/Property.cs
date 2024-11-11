@@ -19,12 +19,14 @@ namespace Classes
             Number = propertyNumber;
             References = new();
         }
+
         public override Estate CloneWithoutReferences()
         {
             var copy = (Property)this.MemberwiseClone();
             copy.References = null;
             return copy;
         }
+
         public override Estate Clone()
         {
             var copy = (Property)this.MemberwiseClone();
@@ -36,18 +38,24 @@ namespace Classes
                     newRefs.Add(x.CloneWithoutReferences());
                 }
             }
+            copy.References = newRefs;
             return copy;
         }
 
         public override void AddReference(Estate estate)
         {
-            if (References == null) References = new List<Estate>();
+            if (References == null)
+            {
+                References = new List<Estate>();
+            }
+
             References.Add(estate);
         }
 
         public override void RemoveReference(Estate estate)
         {
             var refsToRemove = new List<Estate>();
+            //find refs to remove
             for (int i = 0; i < References.Count; i++)
             {
                 if (References[i].Equals(estate))
@@ -55,6 +63,8 @@ namespace Classes
                     refsToRemove.Add(estate);
                 }
             }
+
+            //remove refs
             for (int i = 0; i < refsToRemove.Count; i++)
             {
                 References.Remove(refsToRemove[i]);

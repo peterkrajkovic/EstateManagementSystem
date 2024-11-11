@@ -1,0 +1,62 @@
+﻿@using GUI.Components.Client
+@using static GUI.Components.Client.Model
+@inject Controller Controller
+
+<MudTable Items="@List" FixedHeader="true" Dense="true" Filter="new Func<Estate,bool>(FilterFunc)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Found Estates</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Type</MudTh>
+        <MudTh>Number</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh>Width x1</MudTh>
+        <MudTh>Height x1</MudTh>
+        <MudTh>Width x2</MudTh>
+        <MudTh>Height x2</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Type">@context.GetType().Name</MudTd>
+        <MudTd DataLabel="Number">@context.Number</MudTd>
+        <MudTd DataLabel="Description">@context.Description</MudTd>
+        <MudTd DataLabel="Width x1">
+            @(context.LeftBottom.Width < 0 ? $"W {Math.Abs(context.LeftBottom.Width)}" : $"E {context.LeftBottom.Width}")
+        </MudTd>
+        <MudTd DataLabel="Height x1">
+            @(context.LeftBottom.Height < 0 ? $"S {Math.Abs(context.LeftBottom.Height)}" : $"N {context.LeftBottom.Height}")
+        </MudTd>
+        <MudTd DataLabel="Width x2">
+            @(context.RightTop.Width < 0 ? $"W {Math.Abs(context.RightTop.Width)}" : $"E {context.RightTop.Width}")
+        </MudTd>
+        <MudTd DataLabel="Height x2">
+            @(context.RightTop.Height < 0 ? $"S {Math.Abs(context.RightTop.Height)}" : $"N {context.RightTop.Height}")
+        </MudTd>
+
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+
+
+
+@code {
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; }
+    [Parameter]
+    public List<Estate> List { get; set; }
+
+    private string? searchString { get; set; }
+
+    private bool FilterFunc(Estate estate)
+    {
+        if (string.IsNullOrEmpty(searchString) || string.IsNullOrEmpty(estate.Description))
+        {
+            return true;
+        }
+        return estate.Description.ToLower().Contains(searchString.ToLower());
+    }
+}

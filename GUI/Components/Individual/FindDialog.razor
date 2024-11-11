@@ -13,16 +13,20 @@
             <MudRadio Value="0">By 1 Point</MudRadio>
             <MudRadio Value="1">By 2 Points</MudRadio>
         </MudRadioGroup>
-        <MudItem xs="2">
+        <MudRadioGroup T="int" @bind-Value="Model.Boundaries">
+            <MudRadio Value="0">By boundaries</MudRadio>
+            <MudRadio Value="1">By range</MudRadio>
+        </MudRadioGroup>
+     @*    <MudItem xs="2">
             <MudTooltip Text="For west width or south height please use negative number" Placement="Placement.Right">
                 <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Primary" />
             </MudTooltip>
-        </MudItem>
+        </MudItem> *@
         <MudGrid>
             @if (Model.GPS == 0)
             {
                 <MudItem>
-                    <MudTextField Label=" width" T="double?" @bind-Value="Model.X1">
+                    <MudTextField Label=" width" Culture="System.Globalization.CultureInfo.CurrentCulture" T="double?" @bind-Value="Model.X1">
                 </MudTextField>
                     <MudSelect T="char" @bind-Value="Model.X1Char">
                         <MudSelectItem Value="'W'">
@@ -30,7 +34,7 @@
                         <MudSelectItem Value="'E'">
                         </MudSelectItem>
                     </MudSelect>
-                    <MudTextField T="double?" Label="height" @bind-Value="Model.Y1">
+                    <MudTextField T="double?" Culture="System.Globalization.CultureInfo.CurrentCulture" Label="height" @bind-Value="Model.Y1">
                     </MudTextField>
                     <MudSelect T="char" @bind-Value="Model.Y1Char">
                         <MudSelectItem Value="'S'">
@@ -43,7 +47,7 @@
             {
                 <MudItem xs="6">
                     <MudText>Left Bottom Point</MudText>
-                    <MudTextField Label=" width" T="double?" @bind-Value="Model.X1">
+                    <MudTextField Label=" width" Culture="System.Globalization.CultureInfo.CurrentCulture" T="double?" @bind-Value="Model.X1">
                     </MudTextField>
                     <MudSelect T="char" @bind-Value="Model.X1Char">
                         <MudSelectItem Value="'W'">
@@ -51,7 +55,7 @@
                         <MudSelectItem Value="'E'">
                         </MudSelectItem>
                     </MudSelect>
-                    <MudTextField T="double?" Label="height" @bind-Value="Model.Y1">
+                    <MudTextField T="double?" Label="height" Culture="System.Globalization.CultureInfo.CurrentCulture" @bind-Value="Model.Y1">
                     </MudTextField>
                     <MudSelect T="char" @bind-Value="Model.Y1Char">
                         <MudSelectItem Value="'S'">
@@ -62,7 +66,7 @@
                 </MudItem>
                 <MudItem xs="6">
                     <MudText>Right Top Point</MudText>
-                    <MudTextField Label=" width" T="double?" @bind-Value="Model.X2">
+                    <MudTextField Label=" width" T="double?" Culture="System.Globalization.CultureInfo.CurrentCulture" @bind-Value="Model.X2">
                     </MudTextField>
                     <MudSelect T="char" @bind-Value="Model.X2Char">
                         <MudSelectItem Value="'W'">
@@ -70,7 +74,7 @@
                           <MudSelectItem Value="'E'">
                         </MudSelectItem>
                     </MudSelect>
-                    <MudTextField T="double?" Label="height" @bind-Value="Model.Y2">
+                    <MudTextField T="double?" Label="height" Culture="System.Globalization.CultureInfo.CurrentCulture" @bind-Value="Model.Y2">
                     </MudTextField>
                     <MudSelect T="char" @bind-Value="Model.Y2Char">
                         <MudSelectItem Value="'S'">
@@ -117,7 +121,8 @@
         public char X2Char { get; set; } = 'E';
         public double? Y2 { get; set; }
         public char Y2Char { get; set; } = 'N';
-        public int GPS { get; set; }
+        public int GPS { get; set; }  //0- 1 point search, 1- 2point search 
+        public int Boundaries { get; set;} //0-boundaries, 1 range
         public int EstateType { get; set; } //0-Property, 1-Parcel, 2-All
     }
 }
