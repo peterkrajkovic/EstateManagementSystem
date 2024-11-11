@@ -138,8 +138,13 @@ namespace Backend
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="oldParcel"></param>
-        /// <param name="newParcel"></param>
+        /// <param name="oldEstate"></param>
+        /// <param name="description"></param>
+        /// <param name="number"></param>
+        /// <param name="leftBottomWidth"></param>
+        /// <param name="leftBottomHeight"></param>
+        /// <param name="rightTopWidth"></param>
+        /// <param name="rightTopHeight"></param>
         /// <returns>structures changed or not</returns>
         public bool EditEstate(Estate oldEstate, string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)
         {
@@ -512,6 +517,15 @@ namespace Backend
             }
         }
 
+        /// <summary>
+        /// used when loading random trees
+        /// </summary>
+        /// <param name="currentId"></param>
+        /// <param name="gps"></param>
+        /// <param name="usedProperties"></param>
+        /// <param name="usedParcels"></param>
+        /// <param name="coverage"></param>
+        /// <returns>new Parcel</returns>
         public Parcel CreateParcel(long currentId, GPS[] gps, List<Estate>? usedProperties, List<Estate>? usedParcels, double coverage)
         {
             if (coverage > 0)
@@ -540,6 +554,15 @@ namespace Backend
             return p;
         }
 
+        /// <summary>
+        /// used when loading random trees
+        /// </summary>
+        /// <param name="currentId"></param>
+        /// <param name="gps"></param>
+        /// <param name="usedProperties"></param>
+        /// <param name="usedParcels"></param>
+        /// <param name="coverage"></param>
+        /// <returns>new Property</returns>
         private Property CreateProperty(long currentId, GPS[] gps, List<Estate> usedProperties, List<Estate> usedParcels, double coverage)
         {
             if (coverage > 0)

@@ -261,7 +261,8 @@ namespace Classes.structures
             
         }
         /// <summary>
-        /// Returns one predecessor based on dimension currentDImension is now dimension of the predecessor
+        /// Returns one predecessor based on dimension 
+        /// currentDimension is now dimension of the predecessor
         /// </summary>
         /// <param name="root"></param>
         /// <param name="dimension"></param>

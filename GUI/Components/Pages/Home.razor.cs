@@ -148,6 +148,7 @@ namespace GUI.Components.Pages
             if (result != null && !result.Canceled && result.Data != null && result.Data is FindDialog.FindModel)
             {
                 FindDialog.FindModel model = (FindDialog.FindModel)result.Data;
+
                 #region Change directions by chars
                 if (model.X1Char != null && model.X1Char == 'W')
                 {

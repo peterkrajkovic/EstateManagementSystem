@@ -5,10 +5,15 @@ using Classes.structures;
 namespace GUI.Components.Client
 
 {
+    /// <summary>
+    /// Controller acts as a middleman between gui and backend 
+    /// - backend is represented as attribute
+    /// - if backend was api this class would replace Core attribute with http client
+    /// </summary>
     public class Controller
     {
 
-        public Core Core { get; set; } = new Core();
+        private Core Core { get; set; } = new Core();
 
         #region Insert
         public bool InsertParcel(string description, int number, double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight)

@@ -16,7 +16,7 @@ namespace Test
     {
 
         #region Structs for RandomOperationTest
-        private static Func<CustomClass, CustomClass, int, int> customCompareFunc = (CustomClass first, CustomClass second, int level) =>
+        private static Func<Class4D, Class4D, int, int> customCompareFunc = (Class4D first, Class4D second, int level) =>
         {
             switch (level)
             {
@@ -54,7 +54,7 @@ namespace Test
             }
         };
 
-        public class CustomClass
+        public class Class4D
         {
             public double A { get; set; }
             public string B { get; set; }
@@ -70,13 +70,13 @@ namespace Test
 
         [DataTestMethod]
         [DataRow(1000000)]
-        public void RandomOperationTest(int operations)
+        public void RandomOperationTest4D(int operations)
         {
-            KDTree<CustomClass> tree = new KDTree<CustomClass>(4, customCompareFunc);
+            KDTree<Class4D> tree = new KDTree<Class4D>(4, customCompareFunc);
             Console.WriteLine($"Starting RandomOperationTest with {operations} operations.");
             int failed = 0;
 
-            List<CustomClass> added = new();
+            List<Class4D> added = new();
             Random rnd = new Random();
             long currentId = 0;
 
@@ -138,7 +138,7 @@ namespace Test
                 {
                     //insert
 
-                    CustomClass newItem = new CustomClass() { A = rnd.NextDouble(), B = "", C = rnd.Next(), D = rnd.NextDouble() };
+                    Class4D newItem = new Class4D() { A = rnd.NextDouble(), B = "", C = rnd.Next(), D = rnd.NextDouble() };
                     currentId++;
                     Console.WriteLine($"Operation {i+1}. Inserting " + newItem.ToString());
                     long currentCount = tree.Count;
