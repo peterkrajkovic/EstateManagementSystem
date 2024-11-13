@@ -217,7 +217,7 @@ namespace Backend
         #endregion
 
         #region RangeFind
-        public List<Estate>? RangeFindParcels(double leftBottomWidth, double leftBottomHeight, double rightTopHeight, double rightTopWidth, bool clone = true)
+        public List<Estate>? RangeFindParcels(double leftBottomWidth, double leftBottomHeight, double rightTopWidth, double rightTopHeight, bool clone = true)
         {
             List<Estate> estates = new();
             char leftWidthChar = leftBottomWidth >= 0 ? 'E' : 'W';

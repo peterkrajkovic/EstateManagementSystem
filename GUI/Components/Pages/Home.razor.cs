@@ -21,6 +21,8 @@ namespace GUI.Components.Pages
         private int PaperView { get; set; } = 0;
         private FindDialog.FindModel? LastFindModel { get; set; }
 
+        private MudFileUpload<IBrowserFile> fileUpload;
+
         private async void LoadRandomTrees()
         {
             var options = new DialogOptions { CloseOnEscapeKey = true };
@@ -70,7 +72,10 @@ namespace GUI.Components.Pages
         private async void UploadFiles(IBrowserFile file)
         {
             long maxFileSize = 1024 * 1024 * 100; // 100 MB
-
+            if (file == null)
+            {
+                return;
+            }
 
             try
             {
@@ -97,6 +102,10 @@ namespace GUI.Components.Pages
                 {
                     Snackbar.Add("File is empty.", Severity.Warning);
                 }
+                stream.Close();
+                reader.Close();
+                if (fileUpload != null)
+                    fileUpload.ClearAsync();
             }
             catch (IOException _) //stream could not be opened 
             {
